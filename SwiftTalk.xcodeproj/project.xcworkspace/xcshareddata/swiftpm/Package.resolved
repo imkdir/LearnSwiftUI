@@ -1,0 +1,15 @@
+{
+  "originHash" : "f54192b5dd3e1275642ba49aeb83c4803b59274bc8c617eec31e3cb02223a82c",
+  "pins" : [
+    {
+      "identity" : "tiny-networking",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/objcio/tiny-networking",
+      "state" : {
+        "revision" : "45ba230cc9a843bf82a642803a43ef8838dc5b70",
+        "version" : "0.5.0"
+      }
+    }
+  ],
+  "version" : 3
+}

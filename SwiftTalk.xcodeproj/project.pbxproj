@@ -6,13 +6,30 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		038BE8502EEA986300CC3968 /* TinyNetworking in Frameworks */ = {isa = PBXBuildFile; productRef = 038BE84F2EEA986300CC3968 /* TinyNetworking */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		038BE8342EEA83FE00CC3968 /* SwiftTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		038BE8522EEA98DE00CC3968 /* Exceptions for "SwiftTalk" folder in "SwiftTalk" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 038BE8332EEA83FE00CC3968 /* SwiftTalk */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		038BE8362EEA83FE00CC3968 /* SwiftTalk */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				038BE8522EEA98DE00CC3968 /* Exceptions for "SwiftTalk" folder in "SwiftTalk" target */,
+			);
 			path = SwiftTalk;
 			sourceTree = "<group>";
 		};
@@ -23,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				038BE8502EEA986300CC3968 /* TinyNetworking in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +83,7 @@
 			);
 			name = SwiftTalk;
 			packageProductDependencies = (
+				038BE84F2EEA986300CC3968 /* TinyNetworking */,
 			);
 			productName = CurrencyConverter;
 			productReference = 038BE8342EEA83FE00CC3968 /* SwiftTalk.app */;
@@ -94,6 +113,9 @@
 			);
 			mainGroup = 038BE82B2EEA83FE00CC3968;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				038BE84E2EEA986300CC3968 /* XCRemoteSwiftPackageReference "tiny-networking" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 038BE8352EEA83FE00CC3968 /* Products */;
 			projectDirPath = "";
@@ -254,6 +276,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SwiftTalk/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -301,6 +324,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SwiftTalk/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -357,6 +381,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		038BE84E2EEA986300CC3968 /* XCRemoteSwiftPackageReference "tiny-networking" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/objcio/tiny-networking";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.5.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		038BE84F2EEA986300CC3968 /* TinyNetworking */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 038BE84E2EEA986300CC3968 /* XCRemoteSwiftPackageReference "tiny-networking" */;
+			productName = TinyNetworking;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 038BE82C2EEA83FE00CC3968 /* Project object */;
 }
