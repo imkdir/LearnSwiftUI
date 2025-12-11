@@ -83,56 +83,52 @@ struct CollectionDetail: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                VStack {
-                    artwork.value.map({
-                        Image(uiImage: $0)
-                            .resizable()
-                            .scaledToFit()
-                            .ignoresSafeArea()
-                    })
-                    Spacer()
-                }
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        Text(collection.title)
-                            .bold()
-                            .font(.largeTitle)
-                            .lineLimit(2)
-                            .shadow(radius: 0, x: 2, y: 2)
-                            .padding()
-                            .background(Color(uiColor: .systemBackground.withAlphaComponent(0.8)))
-                            .border(.secondary)
-                        Text(collection.description)
-                            .lineLimit(nil)
-                        LazyVStack(alignment: .leading, spacing: 16) {
-                            ForEach(episodes.sorted()) { item in
-                                NavigationLink(destination: {
-                                    // TODO: episode detail view
-                                }) {
-                                    VStack(alignment: .leading) {
-                                        Text(item.title)
-                                            .font(.title2)
-                                            .bold()
-                                        Text("Episode \(item.number)")
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                        Text(item.synopsis)
-                                        isLastEpisode(item) ? nil : Divider()
-                                    }
-                                }.buttonStyle(.plain)
-                            }
-                        }
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text(collection.title)
+                        .bold()
+                        .font(.largeTitle)
+                        .lineLimit(2)
+                        .shadow(radius: 0, x: 2, y: 2)
                         .padding()
-                        .background(Color(uiColor: .systemBackground))
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                        .shadow(color: Color(uiColor: .separator.withAlphaComponent(0.1)), radius: 8)
-                        .opacity(episodes.isEmpty ? 0 : 1)
-                        .animation(.easeInOut, value: episodes.isEmpty)
+                        .background(Color(uiColor: .systemBackground.withAlphaComponent(0.8)))
+                        .border(.secondary)
+                    Text(collection.description)
+                        .lineLimit(nil)
+                    LazyVStack(alignment: .leading, spacing: 16) {
+                        ForEach(episodes.sorted()) { item in
+                            NavigationLink(destination: {
+                                // TODO: episode detail view
+                            }) {
+                                VStack(alignment: .leading) {
+                                    Text(item.title)
+                                        .font(.title2)
+                                        .bold()
+                                    Text("Episode \(item.number)")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                    Text(item.synopsis)
+                                    isLastEpisode(item) ? nil : Divider()
+                                }
+                            }.buttonStyle(.plain)
+                        }
                     }
-                    .padding(.horizontal)
+                    .padding()
+                    .background(Color(uiColor: .systemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .shadow(color: Color(uiColor: .separator.withAlphaComponent(0.1)), radius: 8)
+                    .opacity(episodes.isEmpty ? 0 : 1)
+                    .animation(.easeInOut, value: episodes.isEmpty)
                 }
-                .background(Color.clear)
+                .padding(.horizontal)
+            }
+            .background(alignment: .top) {
+                artwork.value.map({
+                    Image(uiImage: $0)
+                        .resizable()
+                        .scaledToFit()
+                        .ignoresSafeArea()
+                })
             }
         }
     }
