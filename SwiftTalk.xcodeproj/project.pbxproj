@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		038BE8342EEA83FE00CC3968 /* CurrencyConverter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CurrencyConverter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		038BE8342EEA83FE00CC3968 /* SwiftTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		038BE8362EEA83FE00CC3968 /* CurrencyConverter */ = {
+		038BE8362EEA83FE00CC3968 /* SwiftTalk */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CurrencyConverter;
+			path = SwiftTalk;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -32,7 +32,7 @@
 		038BE82B2EEA83FE00CC3968 = {
 			isa = PBXGroup;
 			children = (
-				038BE8362EEA83FE00CC3968 /* CurrencyConverter */,
+				038BE8362EEA83FE00CC3968 /* SwiftTalk */,
 				038BE8352EEA83FE00CC3968 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -40,7 +40,7 @@
 		038BE8352EEA83FE00CC3968 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				038BE8342EEA83FE00CC3968 /* CurrencyConverter.app */,
+				038BE8342EEA83FE00CC3968 /* SwiftTalk.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +48,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		038BE8332EEA83FE00CC3968 /* CurrencyConverter */ = {
+		038BE8332EEA83FE00CC3968 /* SwiftTalk */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 038BE83F2EEA840000CC3968 /* Build configuration list for PBXNativeTarget "CurrencyConverter" */;
+			buildConfigurationList = 038BE83F2EEA840000CC3968 /* Build configuration list for PBXNativeTarget "SwiftTalk" */;
 			buildPhases = (
 				038BE8302EEA83FE00CC3968 /* Sources */,
 				038BE8312EEA83FE00CC3968 /* Frameworks */,
@@ -61,13 +61,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				038BE8362EEA83FE00CC3968 /* CurrencyConverter */,
+				038BE8362EEA83FE00CC3968 /* SwiftTalk */,
 			);
-			name = CurrencyConverter;
+			name = SwiftTalk;
 			packageProductDependencies = (
 			);
 			productName = CurrencyConverter;
-			productReference = 038BE8342EEA83FE00CC3968 /* CurrencyConverter.app */;
+			productReference = 038BE8342EEA83FE00CC3968 /* SwiftTalk.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -85,7 +85,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 038BE82F2EEA83FE00CC3968 /* Build configuration list for PBXProject "CurrencyConverter" */;
+			buildConfigurationList = 038BE82F2EEA83FE00CC3968 /* Build configuration list for PBXProject "SwiftTalk" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -99,7 +99,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				038BE8332EEA83FE00CC3968 /* CurrencyConverter */,
+				038BE8332EEA83FE00CC3968 /* SwiftTalk */,
 			);
 		};
 /* End PBXProject section */
@@ -269,7 +269,10 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.7;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.imkdir.CurrencyConverter;
+				PRODUCT_BUNDLE_IDENTIFIER = com.imkdir.SwiftTalk;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = com.mkdir.SwfitTalk;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = com.mkdir.SwfitTalk;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=xros*]" = com.mkdir.SwfitTalk;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -313,7 +316,10 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.7;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.imkdir.CurrencyConverter;
+				PRODUCT_BUNDLE_IDENTIFIER = com.imkdir.SwiftTalk;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = com.mkdir.SwfitTalk;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = com.mkdir.SwfitTalk;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=xros*]" = com.mkdir.SwfitTalk;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -332,7 +338,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		038BE82F2EEA83FE00CC3968 /* Build configuration list for PBXProject "CurrencyConverter" */ = {
+		038BE82F2EEA83FE00CC3968 /* Build configuration list for PBXProject "SwiftTalk" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				038BE83D2EEA840000CC3968 /* Debug */,
@@ -341,7 +347,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		038BE83F2EEA840000CC3968 /* Build configuration list for PBXNativeTarget "CurrencyConverter" */ = {
+		038BE83F2EEA840000CC3968 /* Build configuration list for PBXNativeTarget "SwiftTalk" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				038BE8402EEA840000CC3968 /* Debug */,
