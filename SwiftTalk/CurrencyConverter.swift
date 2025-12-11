@@ -34,14 +34,17 @@ final class Resource<A> {
     
     init(endpoint: Endpoint<A>) {
         self.endpoint = endpoint
+        print(endpoint.description, #function)
         reload()
     }
     
     deinit {
+        print(endpoint.description, #function)
         dataTask = nil
     }
     
     func reload() {
+        print(endpoint.description, #function)
         dataTask = URLSession.shared.load(endpoint) { [weak self] result in
             self?.value = try? result.get()
         }
