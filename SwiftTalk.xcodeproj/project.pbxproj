@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		038BE8502EEA986300CC3968 /* TinyNetworking in Frameworks */ = {isa = PBXBuildFile; productRef = 038BE84F2EEA986300CC3968 /* TinyNetworking */; };
+		038BE8552EEAA7D400CC3968 /* Model in Frameworks */ = {isa = PBXBuildFile; productRef = 038BE8542EEAA7D400CC3968 /* Model */; };
+		038BE8572EEAA7D400CC3968 /* ViewHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 038BE8562EEAA7D400CC3968 /* ViewHelpers */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +42,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				038BE8572EEAA7D400CC3968 /* ViewHelpers in Frameworks */,
+				038BE8552EEAA7D400CC3968 /* Model in Frameworks */,
 				038BE8502EEA986300CC3968 /* TinyNetworking in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -84,6 +88,8 @@
 			name = SwiftTalk;
 			packageProductDependencies = (
 				038BE84F2EEA986300CC3968 /* TinyNetworking */,
+				038BE8542EEAA7D400CC3968 /* Model */,
+				038BE8562EEAA7D400CC3968 /* ViewHelpers */,
 			);
 			productName = CurrencyConverter;
 			productReference = 038BE8342EEA83FE00CC3968 /* SwiftTalk.app */;
@@ -115,6 +121,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				038BE84E2EEA986300CC3968 /* XCRemoteSwiftPackageReference "tiny-networking" */,
+				038BE8532EEAA7D400CC3968 /* XCRemoteSwiftPackageReference "swift-talk-shared" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 038BE8352EEA83FE00CC3968 /* Products */;
@@ -391,6 +398,14 @@
 				minimumVersion = 0.5.0;
 			};
 		};
+		038BE8532EEAA7D400CC3968 /* XCRemoteSwiftPackageReference "swift-talk-shared" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/objcio/swift-talk-shared";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.3;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -398,6 +413,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 038BE84E2EEA986300CC3968 /* XCRemoteSwiftPackageReference "tiny-networking" */;
 			productName = TinyNetworking;
+		};
+		038BE8542EEAA7D400CC3968 /* Model */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 038BE8532EEAA7D400CC3968 /* XCRemoteSwiftPackageReference "swift-talk-shared" */;
+			productName = Model;
+		};
+		038BE8562EEAA7D400CC3968 /* ViewHelpers */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 038BE8532EEAA7D400CC3968 /* XCRemoteSwiftPackageReference "swift-talk-shared" */;
+			productName = ViewHelpers;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

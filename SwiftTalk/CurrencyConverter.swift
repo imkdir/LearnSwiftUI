@@ -13,9 +13,9 @@ struct FixerData: Codable {
     var rates: [String: Double]
 }
 
-let baseUrl = "http://data.fixer.io/api"
-let apiKey = "6c03d31807226b92f10012fe61ee5b2e"
-let latest = Endpoint<FixerData>(
+private let baseUrl = "http://data.fixer.io/api"
+private let apiKey = "6c03d31807226b92f10012fe61ee5b2e"
+private let latest = Endpoint<FixerData>(
     json: .get,
     url: URL(string: "\(baseUrl)/latest?access_key=\(apiKey)")!
 )

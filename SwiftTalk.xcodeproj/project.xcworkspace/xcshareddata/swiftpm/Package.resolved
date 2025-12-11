@@ -1,6 +1,15 @@
 {
-  "originHash" : "f54192b5dd3e1275642ba49aeb83c4803b59274bc8c617eec31e3cb02223a82c",
+  "originHash" : "f8b477a7551b518b86be0d2e90404b952ba3b2c01d82a6662011ee7f1bdb4209",
   "pins" : [
+    {
+      "identity" : "swift-talk-shared",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/objcio/swift-talk-shared",
+      "state" : {
+        "revision" : "0238161c1bf1a3db01c6d51b801e6d02656199b4",
+        "version" : "0.3.3"
+      }
+    },
     {
       "identity" : "tiny-networking",
       "kind" : "remoteSourceControl",
