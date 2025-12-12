@@ -11,14 +11,6 @@ import Model
 import ViewHelpers
 
 private let baseUrl = "https://talk.objc.io"
-private let collections = Endpoint<[CollectionView]>(
-    json: .get,
-    url: URL(string: "\(baseUrl)/collections.json")!
-)
-private let episodes = Endpoint<[EpisodeView]>(
-    json: .get,
-    url: URL(string: "\(baseUrl)/episodes.json")!
-)
 
 struct ImageError: Error {}
 
@@ -34,28 +26,51 @@ extension Endpoint where A == UIImage {
     }
 }
 
-extension CollectionView {
-    var artworkEndpoint: Endpoint<UIImage> {
-        .init(imageUrl: artwork.png)
-    }
-}
-
 class Store {
     static let shared = Store()
     
     lazy private(set) var allEpisodes = Resource<[EpisodeView]>(endpoint: episodes)
     lazy private(set) var allCollections = Resource<[CollectionView]>(endpoint: collections)
     
-    private(set) var cachedImages: [String: Resource<UIImage>] = [:]
+    private(set) var cachedArtworks: [String: Resource<UIImage>] = [:]
+    private(set) var cachedPosters: [String: Resource<UIImage>] = [:]
+    private(set) var cachedThumbnails: [String: Resource<UIImage>] = [:]
     
-    func loadImage(of collection: CollectionView) -> Resource<UIImage> {
-        if let image = cachedImages[collection.id] {
+    func loadArtwork(of collection: CollectionView) -> Resource<UIImage> {
+        if let image = cachedArtworks[collection.id] {
             return image
         }
-        let image = Resource(endpoint: collection.artworkEndpoint)
-        cachedImages[collection.id] = image
+        let image = Resource(endpoint: .init(imageUrl: collection.artwork.png))
+        cachedArtworks[collection.id] = image
         return image
     }
+    
+    func loadPoster(of episode: EpisodeView) -> Resource<UIImage> {
+        if let image = cachedPosters[episode.id] {
+            return image
+        }
+        let image = Resource(endpoint: .init(imageUrl: episode.poster_url))
+        cachedPosters[episode.id] = image
+        return image
+    }
+    
+    func loadThumbnail(of episode: EpisodeView) -> Resource<UIImage> {
+        if let image = cachedThumbnails[episode.id] {
+            return image
+        }
+        let image = Resource(endpoint: .init(imageUrl: episode.small_poster_url))
+        cachedThumbnails[episode.id] = image
+        return image
+    }
+    
+    private let collections = Endpoint<[CollectionView]>(
+        json: .get,
+        url: URL(string: "\(baseUrl)/collections.json")!
+    )
+    private let episodes = Endpoint<[EpisodeView]>(
+        json: .get,
+        url: URL(string: "\(baseUrl)/episodes.json")!
+    )
 }
 
 extension EnvironmentValues {
@@ -78,7 +93,7 @@ struct CollectionDetail: View {
     }
     
     var artwork: Resource<UIImage> {
-        Store.shared.loadImage(of: collection)
+        Store.shared.loadArtwork(of: collection)
     }
     
     var body: some View {
@@ -89,7 +104,6 @@ struct CollectionDetail: View {
                         .bold()
                         .font(.largeTitle)
                         .lineLimit(2)
-                        .shadow(radius: 0, x: 2, y: 2)
                         .padding()
                         .background(Color(uiColor: .systemBackground.withAlphaComponent(0.8)))
                         .border(.secondary)
@@ -103,8 +117,8 @@ struct CollectionDetail: View {
                                 VStack(alignment: .leading) {
                                     Text(item.title)
                                         .font(.title2)
-                                        .bold()
-                                    Text("Episode \(item.number)")
+                                        .fontWeight(.semibold)
+                                    Text("Episode \(item.number) · \(item.released_at.desc)")
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                     Text(item.synopsis)
@@ -135,11 +149,12 @@ struct CollectionDetail: View {
 }
 
 struct SwiftTalk {
+    var collections: [CollectionView] {
+        Store.shared.allCollections.value ?? []
+    }
     
-    private let allCollections = Resource(endpoint: collections)
-    
-    var data: [CollectionView] {
-        allCollections.value ?? []
+    var episodes: [EpisodeView] {
+        Store.shared.allEpisodes.value ?? []
     }
 }
 
@@ -149,24 +164,80 @@ extension CollectionView {
     }
 }
 
-extension SwiftTalk: View {
+extension EpisodeView {
+    var caption: String {
+        "\(TimeInterval(media_duration).hoursAndMinutes) · \(released_at.desc)"
+    }
+}
+
+struct EpisodeItem: View {
+    let episode: EpisodeView
+    
+    var thumbnail: Resource<UIImage> {
+        Store.shared.loadThumbnail(of: episode)
+    }
+    
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(data) { datum in
-                    NavigationLink(destination: {
-                        CollectionDetail(collection: datum)
-                    }) {
-                        VStack(alignment: .leading) {
-                            Text(datum.title)
-                            Text(datum.caption)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
+        HStack(alignment: .top) {
+            Group {
+                if let image = thumbnail.value {
+                    Image(uiImage: image)
+                        .resizable()
+                } else {
+                    Rectangle()
+                        .fill(Color(uiColor: .tertiarySystemFill))
                 }
             }
-            .navigationTitle("Collections")
+            .frame(width: 147.5, height: 67.5)
+            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+            VStack(alignment: .leading) {
+                Text(episode.title)
+                    .font(.headline)
+                Text(episode.caption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
+extension SwiftTalk: View {
+    var body: some View {
+        TabView {
+            Tab("Collections", systemImage: "rectangle.grid.2x2") {
+                NavigationStack {
+                    List {
+                        ForEach(collections) { col in
+                            NavigationLink(destination: {
+                                CollectionDetail(collection: col)
+                            }) {
+                                VStack(alignment: .leading) {
+                                    Text(col.title)
+                                        .font(.headline)
+                                    Text(col.caption)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    }
+                    .navigationTitle("Collections")
+                }
+            }
+            Tab("Episodes", systemImage: "rectangle.grid.1x2") {
+                NavigationStack {
+                    List {
+                        ForEach(episodes) { epi in
+                            NavigationLink(destination: {
+                                // TODO: episodes detail
+                            }) {
+                                EpisodeItem(episode: epi)
+                            }
+                        }
+                    }
+                    .navigationTitle("Episodes")
+                }
+            }
         }
     }
 }
@@ -183,9 +254,9 @@ extension EpisodeView: @retroactive Comparable {
     public static func < (lhs: Model.EpisodeView, rhs: Model.EpisodeView) -> Bool {
         lhs.number < rhs.number
     }
-    
-    
 }
+
+
 #Preview {
     SwiftTalk()
 }

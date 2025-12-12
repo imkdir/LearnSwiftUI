@@ -20,36 +20,7 @@ private let latest = Endpoint<FixerData>(
     url: URL(string: "\(baseUrl)/latest?access_key=\(apiKey)")!
 )
 
-@Observable
-final class Resource<A> {
-    let endpoint: Endpoint<A>
-    
-    private(set) var value: A?
-    
-    private var dataTask: URLSessionDataTask? {
-        didSet {
-            oldValue?.cancel()
-        }
-    }
-    
-    init(endpoint: Endpoint<A>) {
-        self.endpoint = endpoint
-        print(endpoint.description, #function)
-        reload()
-    }
-    
-    deinit {
-        print(endpoint.description, #function)
-        dataTask = nil
-    }
-    
-    func reload() {
-        print(endpoint.description, #function)
-        dataTask = URLSession.shared.load(endpoint) { [weak self] result in
-            self?.value = try? result.get()
-        }
-    }
-}
+
 
 struct CurrencyConverter {
     @State private var input: String = "42"

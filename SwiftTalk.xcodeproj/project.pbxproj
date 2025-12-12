@@ -10,32 +10,26 @@
 		038BE8502EEA986300CC3968 /* TinyNetworking in Frameworks */ = {isa = PBXBuildFile; productRef = 038BE84F2EEA986300CC3968 /* TinyNetworking */; };
 		038BE8552EEAA7D400CC3968 /* Model in Frameworks */ = {isa = PBXBuildFile; productRef = 038BE8542EEAA7D400CC3968 /* Model */; };
 		038BE8572EEAA7D400CC3968 /* ViewHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 038BE8562EEAA7D400CC3968 /* ViewHelpers */; };
+		038BE8642EEBB32A00CC3968 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 038BE85C2EEBB32A00CC3968 /* Assets.xcassets */; };
+		038BE8662EEBB32A00CC3968 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE85D2EEBB32A00CC3968 /* ContentView.swift */; };
+		038BE8672EEBB32A00CC3968 /* CurrencyConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE85E2EEBB32A00CC3968 /* CurrencyConverter.swift */; };
+		038BE8682EEBB32A00CC3968 /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8602EEBB32A00CC3968 /* Resource.swift */; };
+		038BE8692EEBB32A00CC3968 /* SwiftTalk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8612EEBB32A00CC3968 /* SwiftTalk.swift */; };
+		038BE86A2EEBB32A00CC3968 /* SwiftTalkApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8622EEBB32A00CC3968 /* SwiftTalkApp.swift */; };
+		038BE86C2EEBBE3000CC3968 /* Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE86B2EEBBE3000CC3968 /* Date.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		038BE8342EEA83FE00CC3968 /* SwiftTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		038BE85C2EEBB32A00CC3968 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		038BE85D2EEBB32A00CC3968 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		038BE85E2EEBB32A00CC3968 /* CurrencyConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyConverter.swift; sourceTree = "<group>"; };
+		038BE85F2EEBB32A00CC3968 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		038BE8602EEBB32A00CC3968 /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
+		038BE8612EEBB32A00CC3968 /* SwiftTalk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftTalk.swift; sourceTree = "<group>"; };
+		038BE8622EEBB32A00CC3968 /* SwiftTalkApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftTalkApp.swift; sourceTree = "<group>"; };
+		038BE86B2EEBBE3000CC3968 /* Date.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Date.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		038BE8522EEA98DE00CC3968 /* Exceptions for "SwiftTalk" folder in "SwiftTalk" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 038BE8332EEA83FE00CC3968 /* SwiftTalk */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		038BE8362EEA83FE00CC3968 /* SwiftTalk */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				038BE8522EEA98DE00CC3968 /* Exceptions for "SwiftTalk" folder in "SwiftTalk" target */,
-			);
-			path = SwiftTalk;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		038BE8312EEA83FE00CC3968 /* Frameworks */ = {
@@ -54,7 +48,7 @@
 		038BE82B2EEA83FE00CC3968 = {
 			isa = PBXGroup;
 			children = (
-				038BE8362EEA83FE00CC3968 /* SwiftTalk */,
+				038BE8632EEBB32A00CC3968 /* SwiftTalk */,
 				038BE8352EEA83FE00CC3968 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -65,6 +59,21 @@
 				038BE8342EEA83FE00CC3968 /* SwiftTalk.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		038BE8632EEBB32A00CC3968 /* SwiftTalk */ = {
+			isa = PBXGroup;
+			children = (
+				038BE85F2EEBB32A00CC3968 /* Info.plist */,
+				038BE85C2EEBB32A00CC3968 /* Assets.xcassets */,
+				038BE8622EEBB32A00CC3968 /* SwiftTalkApp.swift */,
+				038BE85D2EEBB32A00CC3968 /* ContentView.swift */,
+				038BE8602EEBB32A00CC3968 /* Resource.swift */,
+				038BE86B2EEBBE3000CC3968 /* Date.swift */,
+				038BE85E2EEBB32A00CC3968 /* CurrencyConverter.swift */,
+				038BE8612EEBB32A00CC3968 /* SwiftTalk.swift */,
+			);
+			path = SwiftTalk;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -81,9 +90,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				038BE8362EEA83FE00CC3968 /* SwiftTalk */,
 			);
 			name = SwiftTalk;
 			packageProductDependencies = (
@@ -138,6 +144,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				038BE8642EEBB32A00CC3968 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -148,6 +155,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				038BE8662EEBB32A00CC3968 /* ContentView.swift in Sources */,
+				038BE86C2EEBBE3000CC3968 /* Date.swift in Sources */,
+				038BE8672EEBB32A00CC3968 /* CurrencyConverter.swift in Sources */,
+				038BE8682EEBB32A00CC3968 /* Resource.swift in Sources */,
+				038BE8692EEBB32A00CC3968 /* SwiftTalk.swift in Sources */,
+				038BE86A2EEBB32A00CC3968 /* SwiftTalkApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
