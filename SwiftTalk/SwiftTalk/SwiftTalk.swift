@@ -30,17 +30,11 @@ extension SwiftTalk: View {
             Tab("Collections", systemImage: "rectangle.grid.2x2") {
                 NavigationStack {
                     List {
-                        ForEach(collections) { col in
+                        ForEach(collections) { item in
                             NavigationLink(destination: {
-                                CollectionDetail(collection: col)
+                                CollectionDetail(collection: item)
                             }) {
-                                VStack(alignment: .leading) {
-                                    Text(col.title)
-                                        .font(.headline)
-                                    Text(col.caption)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
+                                CollectionItem(collection: item)
                             }
                         }
                     }
@@ -52,7 +46,7 @@ extension SwiftTalk: View {
                     List {
                         ForEach(episodes) { item in
                             NavigationLink(destination: {
-                                // TODO: episodes detail
+                                EpisodeDetail(episode: item)
                             }) {
                                 EpisodeItem(episode: item)
                             }

@@ -44,7 +44,7 @@ struct CollectionDetail: View {
                     LazyVStack(alignment: .leading, spacing: 16) {
                         ForEach(episodes.sorted()) { item in
                             NavigationLink(destination: {
-                                // TODO: episode detail view
+                                EpisodeDetail(episode: item)
                             }) {
                                 EpisodeItem(
                                     episode: item,
@@ -74,11 +74,7 @@ struct CollectionDetail: View {
     }
 }
 
-extension CollectionView {
-    var caption: String {
-        "\(episodes_count) episodes · \(TimeInterval(total_duration).hoursAndMinutes)"
-    }
-}
+
 
 extension EpisodeView: @retroactive Comparable {
     public static func == (lhs: EpisodeView, rhs: EpisodeView) -> Bool {
