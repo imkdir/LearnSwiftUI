@@ -12,6 +12,7 @@ import ViewHelpers
 
 extension EnvironmentValues {
     @Entry var allEpisodes = Store.shared.allEpisodes
+    @Entry var allCollections = Store.shared.allCollections
 }
 
 struct SwiftTalk {

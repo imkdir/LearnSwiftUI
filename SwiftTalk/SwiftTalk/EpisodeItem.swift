@@ -11,54 +11,74 @@ import ViewHelpers
 
 struct EpisodeItem: View {
     let episode: EpisodeView
-
+    
     enum Style {
         case value1
         case value2(showDivider: Bool)
     }
     var style: Style = .value1
     
-    var thumbnail: Resource<UIImage> {
-        Store.shared.loadThumbnail(of: episode)
-    }
-    
     var body: some View {
         Group {
             switch style {
             case .value1:
                 HStack(alignment: .top) {
-                    Group {
-                        if let image = thumbnail.value {
-                            Image(uiImage: image)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        } else {
-                            Rectangle()
-                                .fill(Color(uiColor: .tertiarySystemFill))
-                        }
+                    AsyncImage(url: episode.small_poster_url) {
+                        $0.resizable().aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Rectangle().fill(Color(uiColor: .tertiarySystemFill))
                     }
                     .frame(width: 130, height: 60)
                     .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                     VStack(alignment: .leading) {
                         Text(episode.title)
                             .font(.headline)
-                        Text(episode.caption1)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        Caption(
+                            content: episode.caption1,
+                            locked: episode.subscription_only
+                        )
                     }
                 }
             case .value2(let showDivider):
                 VStack(alignment: .leading) {
-                    Text(episode.title)
-                        .font(.headline)
-                    Text(episode.caption2)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    Text(episode.title).font(.headline)
+                    Caption(
+                        content: episode.caption2,
+                        locked: episode.subscription_only
+                    )
                     Text(episode.synopsis)
                     showDivider ? Divider() : nil
                 }
             }
         }
+    }
+}
+
+struct Caption: View {
+    let content: String
+    let locked: Bool
+    
+    @State private var captionHeight = CGFloat.zero
+    
+    var body: some View {
+        HStack(alignment: .center, spacing: 0) {
+            locked
+                ? Image(systemName: "lock.fill")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .padding(.init(top: 2, leading: 0, bottom: 2, trailing: 2))
+                    .frame(maxHeight: captionHeight)
+                : nil
+            Text(content)
+                .font(.caption)
+                .overlay {
+                    GeometryReader { proxy in
+                        Color.clear.onAppear {
+                            self.captionHeight = proxy.frame(in: .local).size.height
+                        }
+                    }
+                }
+        }.foregroundStyle(.secondary)
     }
 }
 

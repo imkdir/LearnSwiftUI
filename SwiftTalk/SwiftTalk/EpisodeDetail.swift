@@ -15,14 +15,19 @@ class PlayerState {
     
     var player: AVPlayer? {
         didSet {
-            oldValue.map({
-                $0.seek(to: .zero)
-                $0.pause()
+            oldValue.map({ p in
+                p.seek(to: .zero)
+                p.pause()
+                timeObserver.map(p.removeTimeObserver(_:))
             })
+            position = 0
             started = false
             observation = player?.observe(\.rate, options: [.new]) {
                 self.paused = ($1.newValue ?? 0) <= 0
             }
+            timeObserver = player?.addPeriodicTimeObserver(forInterval: .init(seconds: 1, preferredTimescale: 1), queue: .main, using: { time in
+                self.position = time.seconds
+            })
         }
     }
     
@@ -34,9 +39,16 @@ class PlayerState {
         }
     }
     
+    var position: TimeInterval = 0 {
+        didSet {
+            print(position)
+        }
+    }
+    
     var started = false
     
     private var observation: NSKeyValueObservation?
+    private var timeObserver: Any?
 }
 
 struct EpisodeDetail: View {
@@ -47,16 +59,12 @@ struct EpisodeDetail: View {
     var player: AVPlayer? {
         playerState.player
     }
-    
-    var poster: Resource<UIImage> {
-        Store.shared.loadPoster(of: episode)
-    }
 
     var overlay: (some View)? {
-        playerState.started ? nil : poster.value.map {
-            Image(uiImage: $0)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
+        playerState.started ? nil : AsyncImage(url: episode.poster_url) {
+            $0.resizable().aspectRatio(contentMode: .fit)
+        } placeholder: {
+            Color.clear
         }
     }
     
@@ -81,11 +89,17 @@ struct EpisodeDetail: View {
             }
             .padding()
             .onAppear {
-                playerState.player = episode.preview_url.map(AVPlayer.init(url:))
+                playerState.player = episode.mediaUrl.map(AVPlayer.init(url:))
             }
             .onDisappear {
                 playerState.player = nil
             }
         }
+    }
+}
+
+extension EpisodeView {
+    var mediaUrl: URL? {
+        subscription_only ? preview_url : hls_url
     }
 }

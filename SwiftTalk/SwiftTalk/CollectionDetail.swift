@@ -24,10 +24,6 @@ struct CollectionDetail: View {
         episodes.max()?.number == view.number
     }
     
-    var artwork: Resource<UIImage> {
-        Store.shared.loadArtwork(of: collection)
-    }
-    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -63,12 +59,11 @@ struct CollectionDetail: View {
                 .padding(.horizontal)
             }
             .background(alignment: .top) {
-                artwork.value.map({
-                    Image(uiImage: $0)
-                        .resizable()
-                        .scaledToFit()
-                        .ignoresSafeArea()
-                })
+                AsyncImage(url: collection.artwork.png) {
+                    $0.resizable().scaledToFit().ignoresSafeArea()
+                } placeholder: {
+                    Color.clear
+                }
             }
         }
     }
