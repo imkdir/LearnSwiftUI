@@ -61,13 +61,14 @@ class PlayerState {
         }
     }
     
-    let position = CurrentValueSubject<TimeInterval, Never>(0)
-    
-    var time: CMTime {
+    private var time: CMTime {
         .init(seconds: position.value, preferredTimescale: 1)
     }
     
     var started = false
+    
+    @ObservationIgnored
+    private let position = CurrentValueSubject<TimeInterval, Never>(0)
     
     @ObservationIgnored
     private var cancellable: AnyCancellable?
@@ -91,6 +92,18 @@ struct EpisodeDetail: View {
     var overlay: (some View)? {
         playerState.started ? nil : AsyncImage(url: episode.poster_url) {
             $0.resizable().aspectRatio(contentMode: .fit)
+                .overlay {
+                    Button {
+                        player?.play()
+                    } label: {
+                        ZStack {
+                            Color.clear
+                            Image(systemName: "play.circle.fill")
+                                .font(.largeTitle)
+                                .foregroundStyle(Color.white)
+                        }
+                    }
+                }
         } placeholder: {
             Color.clear
         }
@@ -117,12 +130,10 @@ struct EpisodeDetail: View {
             }
             .padding()
             .onAppear {
-                player = episode.mediaUrl.map(AVPlayer.init(url:))
-                playerState.connect(player, episode: episode)
-                
-                if playerState.started {
-                    player?.seek(to: playerState.time, toleranceBefore: .zero, toleranceAfter: .zero)
+                if !playerState.started {
+                    player = episode.mediaUrl.map(AVPlayer.init(url:))
                 }
+                playerState.connect(player, episode: episode)
             }
             .onDisappear {
                 player?.pause()

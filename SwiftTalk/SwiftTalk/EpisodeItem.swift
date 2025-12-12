@@ -30,9 +30,9 @@ struct EpisodeItem: View {
                     }
                     .frame(width: 130, height: 60)
                     .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(episode.title)
-                            .font(.headline)
+                            .bold()
                         Caption(
                             content: episode.caption1,
                             locked: episode.subscription_only
