@@ -7,27 +7,49 @@
 
 import Model
 import AVKit
+import Combine
+import Observation
 import SwiftUI
 import ViewHelpers
 
 @Observable
 class PlayerState {
-    
-    var player: AVPlayer? {
-        didSet {
-            oldValue.map({ p in
-                p.seek(to: .zero)
-                p.pause()
-                timeObserver.map(p.removeTimeObserver(_:))
-            })
-            position = 0
-            started = false
-            observation = player?.observe(\.rate, options: [.new]) {
-                self.paused = ($1.newValue ?? 0) <= 0
+
+    func connect(_ player: AVPlayer?, episode: EpisodeView) {
+        observation = player?.observe(\.rate, options: [.new]) {
+            self.paused = ($1.newValue ?? 0) <= 0
+        }
+        timeObserver = player?.addPeriodicTimeObserver(forInterval: .init(seconds: 1, preferredTimescale: 1), queue: .main, using: { time in
+            self.position.send(time.seconds)
+        })
+        cancellable = position
+            .dropFirst()
+            .throttle(for: .seconds(10), scheduler: RunLoop.main, latest: true)
+            .removeDuplicates()
+            .sink { time in
+                print("send to network \(time)")
             }
-            timeObserver = player?.addPeriodicTimeObserver(forInterval: .init(seconds: 1, preferredTimescale: 1), queue: .main, using: { time in
-                self.position = time.seconds
-            })
+        
+        if let player {
+            if started {
+                player.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero)
+                player.play()
+            } else {
+                player.seek(to: .zero)
+            }
+        }
+    }
+    
+    func disconnect(_ player: AVPlayer?, presented: Bool) {
+        if let player {
+            timeObserver.map(player.removeTimeObserver(_:))
+            player.pause()
+        }
+        cancellable?.cancel()
+        observation = nil
+        
+        if !presented {
+            started = false
         }
     }
     
@@ -39,15 +61,19 @@ class PlayerState {
         }
     }
     
-    var position: TimeInterval = 0 {
-        didSet {
-            print(position)
-        }
+    let position = CurrentValueSubject<TimeInterval, Never>(0)
+    
+    var time: CMTime {
+        .init(seconds: position.value, preferredTimescale: 1)
     }
     
     var started = false
     
+    @ObservationIgnored
+    private var cancellable: AnyCancellable?
+    @ObservationIgnored
     private var observation: NSKeyValueObservation?
+    @ObservationIgnored
     private var timeObserver: Any?
 }
 
@@ -55,9 +81,11 @@ struct EpisodeDetail: View {
     let episode: EpisodeView
     
     private let playerState = PlayerState()
+    @State private var player: AVPlayer?
+    @Environment(\.isPresented) private var isPresented
     
-    var player: AVPlayer? {
-        playerState.player
+    init(episode: EpisodeView) {
+        self.episode = episode
     }
 
     var overlay: (some View)? {
@@ -89,10 +117,16 @@ struct EpisodeDetail: View {
             }
             .padding()
             .onAppear {
-                playerState.player = episode.mediaUrl.map(AVPlayer.init(url:))
+                player = episode.mediaUrl.map(AVPlayer.init(url:))
+                playerState.connect(player, episode: episode)
+                
+                if playerState.started {
+                    player?.seek(to: playerState.time, toleranceBefore: .zero, toleranceAfter: .zero)
+                }
             }
             .onDisappear {
-                playerState.player = nil
+                player?.pause()
+                playerState.disconnect(player, presented: isPresented)
             }
         }
     }

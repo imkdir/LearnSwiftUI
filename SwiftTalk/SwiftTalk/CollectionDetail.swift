@@ -50,9 +50,8 @@ struct CollectionDetail: View {
                         }
                     }
                     .padding()
-                    .background(Color(uiColor: .systemBackground))
+                    .background(Color(uiColor: .systemGroupedBackground))
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    .shadow(color: Color(uiColor: .separator.withAlphaComponent(0.1)), radius: 8)
                     .opacity(episodes.isEmpty ? 0 : 1)
                     .animation(.easeInOut, value: episodes.isEmpty)
                 }

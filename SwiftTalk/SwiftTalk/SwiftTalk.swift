@@ -56,6 +56,12 @@ extension SwiftTalk: View {
                     .navigationTitle("Episodes")
                 }
             }
+            Tab("Account", systemImage: "person.fill") {
+                NavigationStack {
+                    Account()
+                        .navigationTitle("Account")
+                }
+            }
         }
     }
 }

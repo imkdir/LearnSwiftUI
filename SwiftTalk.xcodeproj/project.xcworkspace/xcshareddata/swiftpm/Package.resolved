@@ -1,6 +1,15 @@
 {
-  "originHash" : "f8b477a7551b518b86be0d2e90404b952ba3b2c01d82a6662011ee7f1bdb4209",
+  "originHash" : "f806cc4b1de1f0de18feb08be90a1e63cc34582c3f16552f2a1ac988c0d25653",
   "pins" : [
+    {
+      "identity" : "keychain-item",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/objcio/keychain-item",
+      "state" : {
+        "revision" : "563fc973ee4c1fcdea646630f847a241025da3c4",
+        "version" : "0.1.0"
+      }
+    },
     {
       "identity" : "swift-talk-shared",
       "kind" : "remoteSourceControl",

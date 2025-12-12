@@ -22,6 +22,8 @@
 		038BE8732EEBD45E00CC3968 /* EpisodeItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8722EEBD45E00CC3968 /* EpisodeItem.swift */; };
 		038BE8752EEBD97500CC3968 /* CollectionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8742EEBD97100CC3968 /* CollectionItem.swift */; };
 		038BE8772EEBDA1900CC3968 /* EpisodeDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8762EEBDA1400CC3968 /* EpisodeDetail.swift */; };
+		038BE8792EEC141B00CC3968 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8782EEC141800CC3968 /* Account.swift */; };
+		038BE87C2EEC1D9D00CC3968 /* KeychainItem in Frameworks */ = {isa = PBXBuildFile; productRef = 038BE87B2EEC1D9D00CC3968 /* KeychainItem */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +41,7 @@
 		038BE8722EEBD45E00CC3968 /* EpisodeItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeItem.swift; sourceTree = "<group>"; };
 		038BE8742EEBD97100CC3968 /* CollectionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionItem.swift; sourceTree = "<group>"; };
 		038BE8762EEBDA1400CC3968 /* EpisodeDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeDetail.swift; sourceTree = "<group>"; };
+		038BE8782EEC141800CC3968 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -49,6 +52,7 @@
 				038BE8572EEAA7D400CC3968 /* ViewHelpers in Frameworks */,
 				038BE8552EEAA7D400CC3968 /* Model in Frameworks */,
 				038BE8502EEA986300CC3968 /* TinyNetworking in Frameworks */,
+				038BE87C2EEC1D9D00CC3968 /* KeychainItem in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -94,6 +98,7 @@
 				038BE8722EEBD45E00CC3968 /* EpisodeItem.swift */,
 				038BE8702EEBD42400CC3968 /* CollectionDetail.swift */,
 				038BE8762EEBDA1400CC3968 /* EpisodeDetail.swift */,
+				038BE8782EEC141800CC3968 /* Account.swift */,
 				038BE86E2EEBD3BF00CC3968 /* Store.swift */,
 			);
 			path = SwiftTalk;
@@ -119,6 +124,7 @@
 				038BE84F2EEA986300CC3968 /* TinyNetworking */,
 				038BE8542EEAA7D400CC3968 /* Model */,
 				038BE8562EEAA7D400CC3968 /* ViewHelpers */,
+				038BE87B2EEC1D9D00CC3968 /* KeychainItem */,
 			);
 			productName = CurrencyConverter;
 			productReference = 038BE8342EEA83FE00CC3968 /* SwiftTalk.app */;
@@ -151,6 +157,7 @@
 			packageReferences = (
 				038BE84E2EEA986300CC3968 /* XCRemoteSwiftPackageReference "tiny-networking" */,
 				038BE8532EEAA7D400CC3968 /* XCRemoteSwiftPackageReference "swift-talk-shared" */,
+				038BE87A2EEC1D9D00CC3968 /* XCRemoteSwiftPackageReference "keychain-item" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 038BE8352EEA83FE00CC3968 /* Products */;
@@ -183,6 +190,7 @@
 				038BE86F2EEBD3BF00CC3968 /* Store.swift in Sources */,
 				038BE8662EEBB32A00CC3968 /* ContentView.swift in Sources */,
 				038BE86C2EEBBE3000CC3968 /* Date.swift in Sources */,
+				038BE8792EEC141B00CC3968 /* Account.swift in Sources */,
 				038BE8672EEBB32A00CC3968 /* CurrencyConverter.swift in Sources */,
 				038BE8732EEBD45E00CC3968 /* EpisodeItem.swift in Sources */,
 				038BE8772EEBDA1900CC3968 /* EpisodeDetail.swift in Sources */,
@@ -447,6 +455,14 @@
 				minimumVersion = 0.3.3;
 			};
 		};
+		038BE87A2EEC1D9D00CC3968 /* XCRemoteSwiftPackageReference "keychain-item" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/objcio/keychain-item";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -464,6 +480,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 038BE8532EEAA7D400CC3968 /* XCRemoteSwiftPackageReference "swift-talk-shared" */;
 			productName = ViewHelpers;
+		};
+		038BE87B2EEC1D9D00CC3968 /* KeychainItem */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 038BE87A2EEC1D9D00CC3968 /* XCRemoteSwiftPackageReference "keychain-item" */;
+			productName = KeychainItem;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
