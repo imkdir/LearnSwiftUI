@@ -91,19 +91,32 @@ struct EpisodeDetail: View {
         self.episode = episode
         self.displayInCollection = displayInCollection
     }
+    
+    var locked: Bool {
+        episode.subscription_only
+    }
 
-    var overlay: (some View)? {
-        playerState.started ? nil : AsyncImage(url: episode.poster_url) {
+    var overlay: (some View) {
+        AsyncImage(url: episode.poster_url) {
             $0.resizable().aspectRatio(contentMode: .fit)
                 .overlay {
-                    Button {
-                        player?.play()
-                    } label: {
-                        ZStack {
+                    Group {
+                        if let player {
+                            Button {
+                                player.play()
+                            } label: {
+                                ZStack {
+                                    Color.clear
+                                        .overlay(alignment: .topLeading) {
+                                            locked ? PreviewBadge() : nil
+                                        }
+                                    Image(systemName: "play.circle.fill")
+                                        .font(.largeTitle)
+                                        .foregroundStyle(Color.white)
+                                }
+                            }
+                        } else {
                             Color.clear
-                            Image(systemName: "play.circle.fill")
-                                .font(.largeTitle)
-                                .foregroundStyle(Color.white)
                         }
                     }
                 }
@@ -135,17 +148,23 @@ struct EpisodeDetail: View {
                     Text(episode.synopsis)
                         .lineLimit(nil)
                         .padding(.vertical, 8)
-                    player.map({ player in
-                        VideoPlayer(player: player) {
+                    Group {
+                        if let player {
+                            VideoPlayer(player: player) {
+                                playerState.started ? nil : overlay
+                            }
+                        } else {
                             overlay
-                        }.aspectRatio(16/9, contentMode: .fit)
-                    })
+                        }
+                    }.aspectRatio(16/9, contentMode: .fit)
                     collection.map({ item in
                         NavigationLink(destination: {
                             CollectionDetail(collection: item)
                         }, label: {
                             VStack(alignment: .leading) {
-                                Text("In Collection").font(.headline).padding(.top, 20)
+                                Text("In Collection")
+                                    .font(.headline)
+                                    .padding(.top, 20)
                                 AsyncImage(url: item.artwork.png) { image in
                                     image
                                         .resizable()
@@ -163,7 +182,8 @@ struct EpisodeDetail: View {
                                             Text(item.title)
                                                 .bold()
                                                 .font(.largeTitle)
-                                                .lineLimit(2)
+                                                .minimumScaleFactor(0.8)
+                                                .lineLimit(nil)
                                                 .padding()
                                                 .background(Color(uiColor: .systemBackground.withAlphaComponent(0.8)))
                                                 .border(.secondary)
@@ -199,5 +219,33 @@ extension EpisodeView {
 
     var caption: String {
         "Episode \(number) · \(TimeInterval(media_duration).hoursAndMinutes) · \(released_at.desc)"
+    }
+}
+
+struct BadgeShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        Path { p in
+            p.addLines([
+                rect.origin,
+                .init(x: rect.maxX, y: rect.origin.y),
+                .init(x: rect.origin.x, y: rect.maxY)
+            ])
+            p.closeSubpath()
+        }
+    }
+}
+
+struct PreviewBadge: View {
+    var body: some View {
+        ZStack {
+            BadgeShape()
+                .frame(width: 80, height: 80)
+                .foregroundStyle(Color.orange)
+            Text("Preview")
+                .font(.headline)
+                .foregroundStyle(.white)
+                .padding(.bottom, 30)
+                .rotationEffect(.init(degrees: -45))
+        }
     }
 }
