@@ -18,6 +18,10 @@ struct EpisodeItem: View {
     }
     var style: Style = .value1
     
+    var locked: Bool {
+        episode.subscription_only
+    }
+    
     var body: some View {
         Group {
             switch style {
@@ -26,62 +30,48 @@ struct EpisodeItem: View {
                     Text(episode.title).font(.headline)
                     HStack {
                         AsyncImage(url: episode.small_poster_url) {
-                            $0.resizable().aspectRatio(contentMode: .fit)
+                            $0.resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .overlay(alignment: .topLeading) {
+                                    locked ? Image(systemName: "lock.square.fill")
+                                        .foregroundStyle(.white)
+                                        .font(.caption)
+                                        .padding([.top, .leading], 2)
+                                    : nil
+                                }
                         } placeholder: {
                             Rectangle().fill(Color(uiColor: .tertiarySystemFill))
                         }
                         .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                         VStack(alignment: .leading, spacing: 0) {
-                            Text(episode.synopsis).font(.footnote).lineLimit(2)
+                            Text(episode.synopsis)
+                                .font(.footnote)
+                                .lineLimit(2)
                             Spacer()
-                            Caption(
-                                content: episode.caption1,
-                                locked: episode.subscription_only
-                            )
+                            Text(episode.caption2)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
                     }
                     .frame(height: 60)
                 }
             case .value2(let showDivider):
                 VStack(alignment: .leading) {
-                    Text(episode.title).font(.headline)
-                    Caption(
-                        content: episode.caption2,
-                        locked: episode.subscription_only
-                    )
+                    Text(episode.title)
+                        .font(.headline)
+                    HStack(spacing: 4) {
+                        locked ? Image(systemName: "lock.fill") : nil
+                        Text(episode.caption2)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                     Text(episode.synopsis)
                     showDivider ? Divider() : nil
                 }
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
             }
         }
-    }
-}
-
-struct Caption: View {
-    let content: String
-    let locked: Bool
-    
-    @State private var captionHeight = CGFloat.zero
-    
-    var body: some View {
-        HStack(alignment: .center, spacing: 0) {
-            locked
-                ? Image(systemName: "lock.fill")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .padding(.init(top: 2, leading: 0, bottom: 2, trailing: 2))
-                    .frame(maxHeight: captionHeight)
-                : nil
-            Text(content)
-                .font(.caption)
-                .overlay {
-                    GeometryReader { proxy in
-                        Color.clear.onAppear {
-                            self.captionHeight = proxy.frame(in: .local).size.height
-                        }
-                    }
-                }
-        }.foregroundStyle(.secondary)
     }
 }
 
