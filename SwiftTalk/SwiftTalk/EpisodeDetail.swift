@@ -14,7 +14,7 @@ import ViewHelpers
 
 @Observable
 class PlayerState {
-
+    
     private(set) var player: AVPlayer?
     
     func connect(episode: EpisodeView) {
@@ -116,7 +116,7 @@ struct EpisodeDetail: View {
     var locked: Bool {
         episode.subscription_only && details == nil
     }
-
+    
     var overlay: (some View) {
         AsyncImage(url: episode.poster_url) {
             $0.resizable().aspectRatio(contentMode: .fit)
@@ -182,38 +182,7 @@ struct EpisodeDetail: View {
                         NavigationLink(destination: {
                             CollectionDetail(collection: item)
                         }, label: {
-                            VStack(alignment: .leading) {
-                                Text("In Collection")
-                                    .font(.headline)
-                                    .padding(.top, 20)
-                                AsyncImage(url: item.artwork.png) { image in
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .background(Color(uiColor: .systemBackground))
-                                        .clipShape(RoundedRectangle(
-                                            cornerSize: .init(width: 12, height: 12),
-                                            style: .continuous
-                                        ))
-                                        .shadow(
-                                            color: Color(uiColor: .init(white: 0, alpha: 0.1)),
-                                            radius: 8
-                                        )
-                                        .overlay(alignment: .bottomLeading) {
-                                            Text(item.title)
-                                                .bold()
-                                                .font(.largeTitle)
-                                                .minimumScaleFactor(0.8)
-                                                .lineLimit(nil)
-                                                .padding()
-                                                .background(Color(uiColor: .systemBackground.withAlphaComponent(0.8)))
-                                                .border(.secondary)
-                                                .padding()
-                                        }
-                                } placeholder: {
-                                    Color(uiColor: .tertiarySystemBackground)
-                                }
-                            }
+                            CollectionCard(collection: item)
                         }).buttonStyle(.plain)
                     })
                 }
@@ -233,9 +202,48 @@ extension EpisodeView {
     var mediaUrl: URL? {
         subscription_only ? preview_url : hls_url
     }
-
+    
     var caption: String {
         "Episode \(number) · \(TimeInterval(media_duration).hoursAndMinutes) · \(released_at.pretty)"
+    }
+}
+
+struct CollectionCard: View {
+    let collection: CollectionView
+    
+    var body: some View {
+        AsyncImage(url: collection.artwork.png) { image in
+            VStack(alignment: .leading) {
+                Text("In Collection")
+                    .font(.headline)
+                    .padding(.top, 20)
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .background(Color(uiColor: .systemBackground))
+                    .clipShape(RoundedRectangle(
+                        cornerSize: .init(width: 12, height: 12),
+                        style: .continuous
+                    ))
+                    .shadow(
+                        color: Color(uiColor: .init(white: 0, alpha: 0.1)),
+                        radius: 8
+                    )
+                    .overlay(alignment: .bottomLeading) {
+                        Text(collection.title)
+                            .bold()
+                            .font(.largeTitle)
+                            .minimumScaleFactor(0.8)
+                            .lineLimit(nil)
+                            .padding()
+                            .background(Color(uiColor: .systemBackground.withAlphaComponent(0.8)))
+                            .border(.secondary)
+                            .padding()
+                    }
+            }
+        } placeholder: {
+            Color(uiColor: .tertiarySystemBackground)
+        }
     }
 }
 

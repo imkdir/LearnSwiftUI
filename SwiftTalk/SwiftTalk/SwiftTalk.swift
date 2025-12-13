@@ -30,17 +30,22 @@ extension SwiftTalk: View {
         TabView {
             Tab("Collections", systemImage: "rectangle.grid.2x2") {
                 NavigationStack {
-                    List {
-                        ForEach(collections) { item in
-                            NavigationLink(destination: {
-                                CollectionDetail(collection: item)
-                            }) {
-                                CollectionItem(collection: item)
-                            }
-                        }
-                    }
-                    .navigationTitle("Collections")
-                }
+                   List {
+                       ForEach(collections) { item in
+                           NavigationLink(destination: {
+                               CollectionDetail(collection: item)
+                           }) {
+                               CollectionItem(collection: item)
+                           }
+                       }
+                   }
+                   .overlay {
+                       if collections.isEmpty {
+                           LoadingIndicator()
+                       }
+                   }
+               }
+               .navigationTitle("Collections")
             }
             Tab("Episodes", systemImage: "rectangle.grid.1x2") {
                 NavigationStack {
@@ -54,6 +59,11 @@ extension SwiftTalk: View {
                         }
                     }
                     .navigationTitle("Episodes")
+                    .overlay {
+                        if collections.isEmpty {
+                            LoadingIndicator()
+                        }
+                    }
                 }
             }
             Tab("Account", systemImage: "person.fill") {
