@@ -80,13 +80,16 @@ class PlayerState {
 
 struct EpisodeDetail: View {
     let episode: EpisodeView
+    let displayInCollection: Bool
     
     private let playerState = PlayerState()
     @State private var player: AVPlayer?
     @Environment(\.isPresented) private var isPresented
+    @Environment(\.allCollections) private var allCollections
     
-    init(episode: EpisodeView) {
+    init(episode: EpisodeView, displayInCollection: Bool = false) {
         self.episode = episode
+        self.displayInCollection = displayInCollection
     }
 
     var overlay: (some View)? {
@@ -109,26 +112,72 @@ struct EpisodeDetail: View {
         }
     }
     
+    var collection: CollectionView? {
+        guard displayInCollection else {
+            return nil
+        }
+        return allCollections.value.flatMap({
+            $0.first(where: { $0.id == episode.collection })
+        })
+    }
+    
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading) {
-                Text(episode.title)
-                    .font(.largeTitle)
-                    .bold()
-                    .lineLimit(nil)
-                Text(episode.caption2)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(episode.synopsis)
-                    .lineLimit(nil)
-                    .padding(.vertical, 8)
-                player.map({ player in
-                    VideoPlayer(player: player) {
-                        overlay
-                    }.aspectRatio(16/9, contentMode: .fit)
-                })
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading) {
+                    Text(episode.title)
+                        .font(.largeTitle)
+                        .bold()
+                        .lineLimit(nil)
+                    Text(episode.caption)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(episode.synopsis)
+                        .lineLimit(nil)
+                        .padding(.vertical, 8)
+                    player.map({ player in
+                        VideoPlayer(player: player) {
+                            overlay
+                        }.aspectRatio(16/9, contentMode: .fit)
+                    })
+                    collection.map({ item in
+                        NavigationLink(destination: {
+                            CollectionDetail(collection: item)
+                        }, label: {
+                            VStack(alignment: .leading) {
+                                Text("In Collection").font(.headline).padding(.top, 20)
+                                AsyncImage(url: item.artwork.png) { image in
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .background(Color(uiColor: .systemBackground))
+                                        .clipShape(RoundedRectangle(
+                                            cornerSize: .init(width: 12, height: 12),
+                                            style: .continuous
+                                        ))
+                                        .shadow(
+                                            color: Color(uiColor: .init(white: 0, alpha: 0.1)),
+                                            radius: 8
+                                        )
+                                        .overlay(alignment: .bottomLeading) {
+                                            Text(item.title)
+                                                .bold()
+                                                .font(.largeTitle)
+                                                .lineLimit(2)
+                                                .padding()
+                                                .background(Color(uiColor: .systemBackground.withAlphaComponent(0.8)))
+                                                .border(.secondary)
+                                                .padding()
+                                        }
+                                } placeholder: {
+                                    Color(uiColor: .tertiarySystemBackground)
+                                }
+                            }
+                        }).buttonStyle(.plain)
+                    })
+                }
+                .padding()
             }
-            .padding()
             .onAppear {
                 if !playerState.started {
                     player = episode.mediaUrl.map(AVPlayer.init(url:))
@@ -146,5 +195,9 @@ struct EpisodeDetail: View {
 extension EpisodeView {
     var mediaUrl: URL? {
         subscription_only ? preview_url : hls_url
+    }
+
+    var caption: String {
+        "Episode \(number) · \(TimeInterval(media_duration).hoursAndMinutes) · \(released_at.desc)"
     }
 }

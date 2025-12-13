@@ -47,7 +47,7 @@ extension SwiftTalk: View {
                     List {
                         ForEach(episodes) { item in
                             NavigationLink(destination: {
-                                EpisodeDetail(episode: item)
+                                EpisodeDetail(episode: item, displayInCollection: true)
                             }) {
                                 EpisodeItem(episode: item)
                             }

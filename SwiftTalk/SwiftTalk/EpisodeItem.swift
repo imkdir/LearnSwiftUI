@@ -22,22 +22,25 @@ struct EpisodeItem: View {
         Group {
             switch style {
             case .value1:
-                HStack(alignment: .top) {
-                    AsyncImage(url: episode.small_poster_url) {
-                        $0.resizable().aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Rectangle().fill(Color(uiColor: .tertiarySystemFill))
+                VStack(alignment: .leading) {
+                    Text(episode.title).font(.headline)
+                    HStack {
+                        AsyncImage(url: episode.small_poster_url) {
+                            $0.resizable().aspectRatio(contentMode: .fit)
+                        } placeholder: {
+                            Rectangle().fill(Color(uiColor: .tertiarySystemFill))
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text(episode.synopsis).font(.footnote).lineLimit(2)
+                            Spacer()
+                            Caption(
+                                content: episode.caption1,
+                                locked: episode.subscription_only
+                            )
+                        }
                     }
-                    .frame(width: 130, height: 60)
-                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(episode.title)
-                            .bold()
-                        Caption(
-                            content: episode.caption1,
-                            locked: episode.subscription_only
-                        )
-                    }
+                    .frame(height: 60)
                 }
             case .value2(let showDivider):
                 VStack(alignment: .leading) {
