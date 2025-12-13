@@ -9,7 +9,7 @@ import SwiftUI
 import Observation
 import TinyNetworking
 
-struct FixerData: Codable {
+struct FixerData: Codable, Equatable {
     var rates: [String: Double]
 }
 

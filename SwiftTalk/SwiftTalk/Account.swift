@@ -51,19 +51,8 @@ class Session: NSObject, ObservableObject, ASWebAuthenticationPresentationContex
         return windowScene.windows.first ?? ASPresentationAnchor(windowScene: windowScene)
     }
     
-    var credentials: (sessionId: String, csrf: String)? {
-        get {
-            guard let sessionId, let csrf else {
-                return nil
-            }
-            return (sessionId, csrf)
-        }
-        set {
-            objectWillChange.send()
-            sessionId = newValue?.sessionId
-            csrf = newValue?.csrf
-        }
-    }
+    @Published
+    var credentials: (sessionId: String, csrf: String)?
     
     func startAuthSession() {
         authSession = ASWebAuthenticationSession(
@@ -89,7 +78,26 @@ class Session: NSObject, ObservableObject, ASWebAuthenticationPresentationContex
         authSession?.start()
     }
     
+    private override init() {
+        super.init()
+        self.load()
+    }
+    
+    private func load() {
+        if let sessionId, let csrf {
+            self.credentials = (sessionId, csrf)
+        } else {
+            self.credentials = nil
+        }
+        cancellable = $credentials
+            .sink { [unowned self] in
+                self.sessionId = $0?.sessionId
+                self.csrf = $0?.csrf
+            }
+    }
+    
     private var authSession: ASWebAuthenticationSession?
+    private var cancellable: AnyCancellable?
     
     @Published
     private(set) var authError: AuthenticationError?

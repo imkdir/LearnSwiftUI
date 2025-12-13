@@ -40,7 +40,8 @@ struct EpisodeItem: View {
                                     : nil
                                 }
                         } placeholder: {
-                            Rectangle().fill(Color(uiColor: .tertiarySystemFill))
+                            Color(uiColor: .tertiarySystemFill)
+                                .frame(width: 131)
                         }
                         .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                         VStack(alignment: .leading, spacing: 0) {
@@ -77,10 +78,10 @@ struct EpisodeItem: View {
 
 extension EpisodeView {
     var caption1: String {
-        "\(TimeInterval(media_duration).hoursAndMinutes) · \(released_at.desc)"
+        "\(TimeInterval(media_duration).hoursAndMinutes) · \(released_at.pretty)"
     }
     
     var caption2: String {
-        "Episode \(number) · \(released_at.desc)"
+        "Episode \(number) · \(released_at.pretty)"
     }
 }

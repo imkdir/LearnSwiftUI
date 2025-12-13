@@ -15,20 +15,37 @@ import ViewHelpers
 @Observable
 class PlayerState {
 
-    func connect(_ player: AVPlayer?, episode: EpisodeView) {
+    private(set) var player: AVPlayer?
+    
+    func connect(episode: EpisodeView) {
+        Store.shared
+            .episodeDetails(episode)
+            .valueSubject
+            .removeDuplicates()
+            .sink { [weak self] details in
+                guard let self else { return }
+                if !self.started {
+                    let mediaUrl = details?.hls_url ?? episode.mediaUrl
+                    self.player = mediaUrl.map(AVPlayer.init(url:))
+                }
+                self.connect(self.player)
+            }.store(in: &cancellables)
+    }
+    
+    private func connect(_ player: AVPlayer?) {
         observation = player?.observe(\.rate, options: [.new]) {
             self.paused = ($1.newValue ?? 0) <= 0
         }
         timeObserver = player?.addPeriodicTimeObserver(forInterval: .init(seconds: 1, preferredTimescale: 1), queue: .main, using: { time in
             self.position.send(time.seconds)
         })
-        cancellable = position
+        position
             .dropFirst()
             .throttle(for: .seconds(10), scheduler: RunLoop.main, latest: true)
             .removeDuplicates()
             .sink { time in
                 print("send to network \(time)")
-            }
+            }.store(in: &cancellables)
         
         if let player {
             if started {
@@ -40,13 +57,13 @@ class PlayerState {
         }
     }
     
-    func disconnect(_ player: AVPlayer?, presented: Bool) {
+    func disconnect(presented: Bool) {
+        cancellables.removeAll()
+        
         if let player {
             timeObserver.map(player.removeTimeObserver(_:))
             player.pause()
         }
-        cancellable?.cancel()
-        observation = nil
         
         if !presented {
             started = false
@@ -71,7 +88,7 @@ class PlayerState {
     private let position = CurrentValueSubject<TimeInterval, Never>(0)
     
     @ObservationIgnored
-    private var cancellable: AnyCancellable?
+    private var cancellables: Set<AnyCancellable> = []
     @ObservationIgnored
     private var observation: NSKeyValueObservation?
     @ObservationIgnored
@@ -83,7 +100,7 @@ struct EpisodeDetail: View {
     let displayInCollection: Bool
     
     private let playerState = PlayerState()
-    @State private var player: AVPlayer?
+    
     @Environment(\.isPresented) private var isPresented
     @Environment(\.allCollections) private var allCollections
     
@@ -92,8 +109,12 @@ struct EpisodeDetail: View {
         self.displayInCollection = displayInCollection
     }
     
+    var details: EpisodeDetails? {
+        Store.shared.episodeDetails(episode).value
+    }
+    
     var locked: Bool {
-        episode.subscription_only
+        episode.subscription_only && details == nil
     }
 
     var overlay: (some View) {
@@ -101,7 +122,7 @@ struct EpisodeDetail: View {
             $0.resizable().aspectRatio(contentMode: .fit)
                 .overlay {
                     Group {
-                        if let player {
+                        if let player = playerState.player {
                             Button {
                                 player.play()
                             } label: {
@@ -149,7 +170,7 @@ struct EpisodeDetail: View {
                         .lineLimit(nil)
                         .padding(.vertical, 8)
                     Group {
-                        if let player {
+                        if let player = playerState.player {
                             VideoPlayer(player: player) {
                                 playerState.started ? nil : overlay
                             }
@@ -199,14 +220,10 @@ struct EpisodeDetail: View {
                 .padding()
             }
             .onAppear {
-                if !playerState.started {
-                    player = episode.mediaUrl.map(AVPlayer.init(url:))
-                }
-                playerState.connect(player, episode: episode)
+                playerState.connect(episode: episode)
             }
             .onDisappear {
-                player?.pause()
-                playerState.disconnect(player, presented: isPresented)
+                playerState.disconnect(presented: isPresented)
             }
         }
     }
@@ -218,7 +235,7 @@ extension EpisodeView {
     }
 
     var caption: String {
-        "Episode \(number) · \(TimeInterval(media_duration).hoursAndMinutes) · \(released_at.desc)"
+        "Episode \(number) · \(TimeInterval(media_duration).hoursAndMinutes) · \(released_at.pretty)"
     }
 }
 

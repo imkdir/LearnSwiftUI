@@ -16,7 +16,6 @@
 		038BE8682EEBB32A00CC3968 /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8602EEBB32A00CC3968 /* Resource.swift */; };
 		038BE8692EEBB32A00CC3968 /* SwiftTalk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8612EEBB32A00CC3968 /* SwiftTalk.swift */; };
 		038BE86A2EEBB32A00CC3968 /* SwiftTalkApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8622EEBB32A00CC3968 /* SwiftTalkApp.swift */; };
-		038BE86C2EEBBE3000CC3968 /* Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE86B2EEBBE3000CC3968 /* Date.swift */; };
 		038BE86F2EEBD3BF00CC3968 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE86E2EEBD3BF00CC3968 /* Store.swift */; };
 		038BE8712EEBD42400CC3968 /* CollectionDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8702EEBD42400CC3968 /* CollectionDetail.swift */; };
 		038BE8732EEBD45E00CC3968 /* EpisodeItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8722EEBD45E00CC3968 /* EpisodeItem.swift */; };
@@ -35,7 +34,6 @@
 		038BE8602EEBB32A00CC3968 /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
 		038BE8612EEBB32A00CC3968 /* SwiftTalk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftTalk.swift; sourceTree = "<group>"; };
 		038BE8622EEBB32A00CC3968 /* SwiftTalkApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftTalkApp.swift; sourceTree = "<group>"; };
-		038BE86B2EEBBE3000CC3968 /* Date.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Date.swift; sourceTree = "<group>"; };
 		038BE86E2EEBD3BF00CC3968 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
 		038BE8702EEBD42400CC3968 /* CollectionDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionDetail.swift; sourceTree = "<group>"; };
 		038BE8722EEBD45E00CC3968 /* EpisodeItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeItem.swift; sourceTree = "<group>"; };
@@ -83,7 +81,6 @@
 				038BE8622EEBB32A00CC3968 /* SwiftTalkApp.swift */,
 				038BE85D2EEBB32A00CC3968 /* ContentView.swift */,
 				038BE8602EEBB32A00CC3968 /* Resource.swift */,
-				038BE86B2EEBBE3000CC3968 /* Date.swift */,
 				038BE85E2EEBB32A00CC3968 /* CurrencyConverter.swift */,
 				038BE86D2EEBD39400CC3968 /* SwiftTalk */,
 			);
@@ -189,7 +186,6 @@
 				038BE8712EEBD42400CC3968 /* CollectionDetail.swift in Sources */,
 				038BE86F2EEBD3BF00CC3968 /* Store.swift in Sources */,
 				038BE8662EEBB32A00CC3968 /* ContentView.swift in Sources */,
-				038BE86C2EEBBE3000CC3968 /* Date.swift in Sources */,
 				038BE8792EEC141B00CC3968 /* Account.swift in Sources */,
 				038BE8672EEBB32A00CC3968 /* CurrencyConverter.swift in Sources */,
 				038BE8732EEBD45E00CC3968 /* EpisodeItem.swift in Sources */,
