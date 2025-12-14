@@ -85,7 +85,9 @@
 				038BE8622EEBB32A00CC3968 /* SwiftTalkApp.swift */,
 				038BE85D2EEBB32A00CC3968 /* ContentView.swift */,
 				038BE8602EEBB32A00CC3968 /* Resource.swift */,
+				038BE87F2EEE3BC700CC3968 /* TravlerEffect.swift */,
 				038BE85E2EEBB32A00CC3968 /* CurrencyConverter.swift */,
+				038BE87D2EED94F300CC3968 /* LoadingIndicator.swift */,
 				038BE86D2EEBD39400CC3968 /* SwiftTalk */,
 			);
 			path = SwiftTalk;
@@ -94,9 +96,7 @@
 		038BE86D2EEBD39400CC3968 /* SwiftTalk */ = {
 			isa = PBXGroup;
 			children = (
-				038BE87F2EEE3BC700CC3968 /* TravlerEffect.swift */,
 				038BE8612EEBB32A00CC3968 /* SwiftTalk.swift */,
-				038BE87D2EED94F300CC3968 /* LoadingIndicator.swift */,
 				038BE8742EEBD97100CC3968 /* CollectionItem.swift */,
 				038BE8722EEBD45E00CC3968 /* EpisodeItem.swift */,
 				038BE8702EEBD42400CC3968 /* CollectionDetail.swift */,

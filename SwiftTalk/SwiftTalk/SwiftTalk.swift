@@ -95,8 +95,18 @@ extension SwiftTalk: View {
             }
             Tab("Practices", systemImage: "square.stack.3d.up") {
                 NavigationStack {
-                    LoadingIndicator()
-                        .navigationTitle("Practices")
+                    List {
+                        NavigationLink {
+                            CurrencyConverter()
+                        } label: {
+                            Text("Currency Converter")
+                        }
+                        NavigationLink {
+                            LoadingIndicator()
+                        } label: {
+                            Text("Loading Indicator")
+                        }
+                    }.navigationTitle("Practices")
                 }
             }
         }
