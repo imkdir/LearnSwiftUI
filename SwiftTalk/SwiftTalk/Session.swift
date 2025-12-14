@@ -11,32 +11,6 @@ import KeychainItem
 import AuthenticationServices
 import Combine
 
-struct Account: View {
-    @ObservedObject private var session = Session.shared
-    
-    var body: some View {
-        Form {
-            if session.credentials == nil {
-                Button(action: logIn, label: {
-                    Text("Log In")
-                })
-            } else {
-                Button(action: logOut, label: {
-                    Text("Log Out")
-                })
-            }
-        }
-    }
-    
-    private func logIn() {
-        session.startAuthSession()
-    }
-    
-    private func logOut() {
-        session.credentials = nil
-    }
-}
-
 class Session: NSObject, ObservableObject, ASWebAuthenticationPresentationContextProviding {
 
     @KeychainItem(account: "sessionId") private var sessionId

@@ -16,6 +16,9 @@ extension EnvironmentValues {
 }
 
 struct SwiftTalk {
+    @ObservedObject private var session = Session.shared
+    @State private var showLogOutAlert = false
+    
     var collections: [CollectionView] {
         Store.shared.allCollections.value ?? []
     }
@@ -39,13 +42,37 @@ extension SwiftTalk: View {
                            }
                        }
                    }
+                   .navigationTitle("Collections")
+                   .toolbar {
+                       ToolbarItem(placement: .primaryAction) {
+                           if session.credentials == nil {
+                               Button {
+                                   session.startAuthSession()
+                               } label: {
+                                   Image(systemName: "person.crop.circle.dashed")
+                               }
+                           } else {
+                               Button {
+                                   showLogOutAlert = true
+                               } label: {
+                                   Image(systemName: "person.crop.circle.fill")
+                               }.alert("Log Out", isPresented: $showLogOutAlert) {
+                                   Button("Log Out", role: .destructive) {
+                                       session.credentials = nil
+                                   }
+                                   Button("Cancel", role: .cancel) { }
+                               } message: {
+                                   Text("Are you sure you want to log out?")
+                               }
+                           }
+                       }
+                   }
                    .overlay {
                        if collections.isEmpty {
                            LoadingIndicator()
                        }
                    }
                }
-               .navigationTitle("Collections")
             }
             Tab("Episodes", systemImage: "rectangle.grid.1x2") {
                 NavigationStack {
@@ -66,10 +93,10 @@ extension SwiftTalk: View {
                     }
                 }
             }
-            Tab("Account", systemImage: "person.fill") {
+            Tab("Practices", systemImage: "square.stack.3d.up") {
                 NavigationStack {
-                    Account()
-                        .navigationTitle("Account")
+                    LoadingIndicator()
+                        .navigationTitle("Practices")
                 }
             }
         }
