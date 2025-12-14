@@ -24,6 +24,7 @@
 		038BE8792EEC141B00CC3968 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8782EEC141800CC3968 /* Account.swift */; };
 		038BE87C2EEC1D9D00CC3968 /* KeychainItem in Frameworks */ = {isa = PBXBuildFile; productRef = 038BE87B2EEC1D9D00CC3968 /* KeychainItem */; };
 		038BE87E2EED950400CC3968 /* LoadingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE87D2EED94F300CC3968 /* LoadingIndicator.swift */; };
+		038BE8802EEE3BC700CC3968 /* TravlerEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE87F2EEE3BC700CC3968 /* TravlerEffect.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,7 @@
 		038BE8762EEBDA1400CC3968 /* EpisodeDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeDetail.swift; sourceTree = "<group>"; };
 		038BE8782EEC141800CC3968 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
 		038BE87D2EED94F300CC3968 /* LoadingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingIndicator.swift; sourceTree = "<group>"; };
+		038BE87F2EEE3BC700CC3968 /* TravlerEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravlerEffect.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,6 +94,7 @@
 		038BE86D2EEBD39400CC3968 /* SwiftTalk */ = {
 			isa = PBXGroup;
 			children = (
+				038BE87F2EEE3BC700CC3968 /* TravlerEffect.swift */,
 				038BE8612EEBB32A00CC3968 /* SwiftTalk.swift */,
 				038BE87D2EED94F300CC3968 /* LoadingIndicator.swift */,
 				038BE8742EEBD97100CC3968 /* CollectionItem.swift */,
@@ -194,6 +197,7 @@
 				038BE8672EEBB32A00CC3968 /* CurrencyConverter.swift in Sources */,
 				038BE8732EEBD45E00CC3968 /* EpisodeItem.swift in Sources */,
 				038BE8772EEBDA1900CC3968 /* EpisodeDetail.swift in Sources */,
+				038BE8802EEE3BC700CC3968 /* TravlerEffect.swift in Sources */,
 				038BE8682EEBB32A00CC3968 /* Resource.swift in Sources */,
 				038BE8692EEBB32A00CC3968 /* SwiftTalk.swift in Sources */,
 				038BE86A2EEBB32A00CC3968 /* SwiftTalkApp.swift in Sources */,
