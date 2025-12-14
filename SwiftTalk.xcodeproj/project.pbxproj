@@ -25,6 +25,8 @@
 		038BE87C2EEC1D9D00CC3968 /* KeychainItem in Frameworks */ = {isa = PBXBuildFile; productRef = 038BE87B2EEC1D9D00CC3968 /* KeychainItem */; };
 		038BE87E2EED950400CC3968 /* LoadingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE87D2EED94F300CC3968 /* LoadingIndicator.swift */; };
 		038BE8802EEE3BC700CC3968 /* TravlerEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE87F2EEE3BC700CC3968 /* TravlerEffect.swift */; };
+		038BE8822EEE8AFA00CC3968 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8812EEE8AF000CC3968 /* FlowLayout.swift */; };
+		038BE8842EEE8E0300CC3968 /* PracticeList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8832EEE8E0300CC3968 /* PracticeList.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +46,8 @@
 		038BE8782EEC141800CC3968 /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 		038BE87D2EED94F300CC3968 /* LoadingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingIndicator.swift; sourceTree = "<group>"; };
 		038BE87F2EEE3BC700CC3968 /* TravlerEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravlerEffect.swift; sourceTree = "<group>"; };
+		038BE8812EEE8AF000CC3968 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
+		038BE8832EEE8E0300CC3968 /* PracticeList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeList.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,8 +90,10 @@
 				038BE85D2EEBB32A00CC3968 /* ContentView.swift */,
 				038BE8602EEBB32A00CC3968 /* Resource.swift */,
 				038BE87F2EEE3BC700CC3968 /* TravlerEffect.swift */,
+				038BE8812EEE8AF000CC3968 /* FlowLayout.swift */,
 				038BE85E2EEBB32A00CC3968 /* CurrencyConverter.swift */,
 				038BE87D2EED94F300CC3968 /* LoadingIndicator.swift */,
+				038BE8832EEE8E0300CC3968 /* PracticeList.swift */,
 				038BE86D2EEBD39400CC3968 /* SwiftTalk */,
 			);
 			path = SwiftTalk;
@@ -194,9 +200,11 @@
 				038BE86F2EEBD3BF00CC3968 /* Store.swift in Sources */,
 				038BE8662EEBB32A00CC3968 /* ContentView.swift in Sources */,
 				038BE8792EEC141B00CC3968 /* Session.swift in Sources */,
+				038BE8822EEE8AFA00CC3968 /* FlowLayout.swift in Sources */,
 				038BE8672EEBB32A00CC3968 /* CurrencyConverter.swift in Sources */,
 				038BE8732EEBD45E00CC3968 /* EpisodeItem.swift in Sources */,
 				038BE8772EEBDA1900CC3968 /* EpisodeDetail.swift in Sources */,
+				038BE8842EEE8E0300CC3968 /* PracticeList.swift in Sources */,
 				038BE8802EEE3BC700CC3968 /* TravlerEffect.swift in Sources */,
 				038BE8682EEBB32A00CC3968 /* Resource.swift in Sources */,
 				038BE8692EEBB32A00CC3968 /* SwiftTalk.swift in Sources */,
