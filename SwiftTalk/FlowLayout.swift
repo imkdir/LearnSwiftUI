@@ -63,27 +63,90 @@ struct FLowLayout {
     }
 }
 
-struct CollectionLayoutView<Elements: RandomAccessCollection, Content: View>: View where Elements.Element: Identifiable {
-    typealias ID = Elements.Element.ID
-    typealias Layout = (Elements, CGSize, [ID: CGSize]) -> [ID: CGSize]
+struct DragState<ID: Hashable> {
+    let id: ID
+    var translation: CGSize
+    var location: CGPoint
+}
+
+struct CollectionLayoutView<Collection: RandomAccessCollection, Content: View>: View where Collection.Element: Identifiable {
+    typealias Element = Collection.Element
+    typealias ID = Element.ID
+    typealias Layout = (Collection, CGSize, [ID: CGSize]) -> [ID: CGSize]
     
-    let data: Elements
-    let content: (Elements.Element) -> Content
+    let data: Collection
+    let content: (Element) -> Content
     let layout: Layout
+    let didMove: (Collection.Index, Collection.Index) -> Void
     
     @State private var sizes: [ID: CGSize] = [:]
     @State private var containerSize: CGSize = .zero
+    @State private var dragState: DragState<ID>?
     
     var offsets: [ID: CGSize] {
         layout(data, containerSize, sizes)
     }
     
+    func offset(of element: Element) -> CGSize {
+        var offset = offsets[element.id, default: .zero]
+        if let dragState, dragState.id == element.id {
+            offset += dragState.translation
+        }
+        return offset
+    }
+    
+    var insertion: (key: ID, value: CGSize)? {
+        guard let location = dragState?.location else {
+            return nil
+        }
+        return offsets
+            .sorted(by: {
+                let (lhs, rhs) = ($0.value, $1.value)
+                return lhs.height > rhs.height
+                    || lhs.height == rhs.height && lhs.width > rhs.width
+            })
+            .first(where: { (_, value) in
+                value.width < location.x && value.height < location.y
+            })
+    }
+    
+    func cursor(at insertion: (key: ID, value: CGSize)) -> some View {
+        Rectangle()
+            .fill(Color.white)
+            .frame(width: 4, height: sizes[insertion.key]?.height)
+            .offset(insertion.value)
+            .offset(x: -7)
+    }
+    
     var body: some View {
         ZStack(alignment: .topLeading) {
-            ForEach(data) {
-                PropagateSize(content: content($0), id: $0.id)
-                    .offset(offsets[$0.id, default: .zero])
+            ForEach(data) { datum in
+                PropagateSize(content: content(datum), id: datum.id)
+                    .offset(offset(of: datum))
                     .animation(.default, value: offsets)
+                    .gesture(DragGesture().onChanged({ value in
+                        dragState = .init(
+                            id: datum.id,
+                            translation: value.translation,
+                            location: value.location
+                        )
+                    }).onEnded({ _ in
+                        guard let dragState else { return }
+                        
+                        if let insertion,
+                           let oldIdx = data.firstIndex(where: { $0.id == dragState.id }),
+                           let newIdx = data.firstIndex(where: { $0.id == insertion.key }) {
+                            self.dragState = nil
+                            didMove(oldIdx, newIdx)
+                        } else {
+                            withAnimation(.bouncy) {
+                                self.dragState = nil
+                            }
+                        }
+                    }))
+                if let insertion {
+                    cursor(at: insertion)
+                }
             }
             Color.clear
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -104,6 +167,7 @@ struct FlowLayoutPlayground: View {
     
     @State private var dividerWidth: CGFloat = 0
     @State private var contentWidth: CGFloat = 60
+    @State private var items = poorRichardQuotes
     
     var body: some View {
         VStack {
@@ -111,7 +175,7 @@ struct FlowLayoutPlayground: View {
                 Color(uiColor: .tertiarySystemBackground)
                     .frame(width: dividerWidth)
                 ScrollView {
-                    CollectionLayoutView(data: poorRichardQuotes) {
+                    CollectionLayoutView(data: items) {
                         Text($0.value)
                             .foregroundStyle($0.color)
                             .padding(2)
@@ -124,6 +188,8 @@ struct FlowLayoutPlayground: View {
                             result[element.id] = .init(width: rect.origin.x, height: rect.origin.y)
                         }
                         return result
+                    } didMove: { oldIdx, newIdx in
+                        items.move(fromOffsets: .init(integer: oldIdx), toOffset: newIdx)
                     }
                 }
                 .padding(2)
@@ -167,5 +233,15 @@ extension Color {
         let hash = value.hashValue
         let hue = Double(abs(hash) % 1000) / 1000.0
         return Color(hue: hue, saturation: 0.6, brightness: 0.8)
+    }
+}
+
+extension CGSize {
+    static func + (lhs: CGSize, rhs: CGSize) -> CGSize {
+        CGSize(width: lhs.width + rhs.width, height: lhs.height + rhs.height)
+    }
+    
+    static func += (lhs: inout CGSize, rhs: CGSize) {
+        lhs = lhs + rhs
     }
 }
