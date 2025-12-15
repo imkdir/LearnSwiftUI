@@ -22,13 +22,9 @@ struct RecorderEffect: GeometryEffect {
 struct AnimationCurve: Shape {
     let data: [CGPoint]
     
-    init(data: [(CFTimeInterval, CGFloat)], sampleSize: CFTimeInterval = 3.0) {
-        guard let last = data.last else {
-            self.data = []
-            return
-        }
-        let slice = data.drop(while: { $0.0 < last.0 - sampleSize })
-        guard let first = slice.first else {
+    init(data: [(CFTimeInterval, CGFloat)]) {
+        guard let last = data.last,
+              let first = data.first else {
             self.data = []
             return
         }
@@ -37,7 +33,7 @@ struct AnimationCurve: Shape {
             self.data = []
             return
         }
-        self.data = slice.map({
+        self.data = data.map({
             .init(x: CGFloat(($0.0 - first.0) / duration), y: $0.1)
         })
     }
@@ -54,28 +50,37 @@ struct AnimationCurve: Shape {
 
 struct AnimationCurveGraph: View {
     let animation: Animation
+    let buffer: CFTimeInterval = 3.0
     
     @State private var recording: [(CFTimeInterval, CGFloat)] = []
-    @State private var isRunning = false
     
     var body: some View {
         VStack(alignment: .leading) {
-            Circle()
-                .fill(Color.red)
-                .frame(height: 30)
-                .offset(x: isRunning ? 120 : 0)
-                .modifier(RecorderEffect(animatableData: isRunning ? 1 : 0) {
-                    self.recording.append((CACurrentMediaTime(), $0))
-                })
-                .animation(animation.repeatForever(), value: isRunning)
+            PhaseAnimator([false, true]) {
+                Circle()
+                    .fill(Color.red)
+                    .frame(height: 30)
+                    .offset(x: $0 ? 200 : 0)
+                    .modifier(RecorderEffect(animatableData: $0 ? 1 : 0) {
+                        let now = CACurrentMediaTime()
+                        let result = self.recording + [(now, $0)]
+                        if let first = result.first, now - first.0 > buffer {
+                            self.recording = Array(result
+                                .drop(while: { now - $0.0 > buffer })
+                            )
+                        } else {
+                            self.recording = result
+                        }
+                    })
+            } animation: { _ in
+                animation
+            }
             AnimationCurve(data: recording)
                 .stroke(Color.blue, lineWidth: 2)
                 .padding()
                 .frame(height: 120)
                 .frame(maxWidth: .infinity)
                 .border(Color.secondary)
-        }.onAppear {
-            isRunning = true
         }
     }
 }
@@ -96,7 +101,6 @@ struct AnimationCurves: View {
     var body: some View {
         VStack {
             AnimationCurveGraph(animation: animation)
-                .id(animation) // FIX: animation locked in by "isRunning"
             Picker("Animation", selection: $animation) {
                 ForEach(animations, id: \.self) {
                     Text(animationKeys[$0, default: "N/A"])
