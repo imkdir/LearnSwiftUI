@@ -27,6 +27,11 @@ struct PracticeList: View {
                 } label: {
                     Text("FlowLayout Playground")
                 }
+                NavigationLink {
+                    ShakeIt()
+                } label: {
+                    Text("Shake It!")
+                }
             }.navigationTitle("Practices")
         }
     }

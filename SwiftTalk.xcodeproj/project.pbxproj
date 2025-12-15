@@ -27,6 +27,7 @@
 		038BE8802EEE3BC700CC3968 /* TravlerEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE87F2EEE3BC700CC3968 /* TravlerEffect.swift */; };
 		038BE8822EEE8AFA00CC3968 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8812EEE8AF000CC3968 /* FlowLayout.swift */; };
 		038BE8842EEE8E0300CC3968 /* PracticeList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8832EEE8E0300CC3968 /* PracticeList.swift */; };
+		038BE8862EEF8D0900CC3968 /* ShakeIt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8852EEF8CFF00CC3968 /* ShakeIt.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +49,7 @@
 		038BE87F2EEE3BC700CC3968 /* TravlerEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravlerEffect.swift; sourceTree = "<group>"; };
 		038BE8812EEE8AF000CC3968 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
 		038BE8832EEE8E0300CC3968 /* PracticeList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeList.swift; sourceTree = "<group>"; };
+		038BE8852EEF8CFF00CC3968 /* ShakeIt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShakeIt.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,6 +95,7 @@
 				038BE8812EEE8AF000CC3968 /* FlowLayout.swift */,
 				038BE85E2EEBB32A00CC3968 /* CurrencyConverter.swift */,
 				038BE87D2EED94F300CC3968 /* LoadingIndicator.swift */,
+				038BE8852EEF8CFF00CC3968 /* ShakeIt.swift */,
 				038BE8832EEE8E0300CC3968 /* PracticeList.swift */,
 				038BE86D2EEBD39400CC3968 /* SwiftTalk */,
 			);
@@ -195,6 +198,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				038BE87E2EED950400CC3968 /* LoadingIndicator.swift in Sources */,
+				038BE8862EEF8D0900CC3968 /* ShakeIt.swift in Sources */,
 				038BE8752EEBD97500CC3968 /* CollectionItem.swift in Sources */,
 				038BE8712EEBD42400CC3968 /* CollectionDetail.swift in Sources */,
 				038BE86F2EEBD3BF00CC3968 /* Store.swift in Sources */,
