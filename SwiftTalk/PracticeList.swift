@@ -32,6 +32,11 @@ struct PracticeList: View {
                 } label: {
                     Text("Shake It!")
                 }
+                NavigationLink {
+                    AnimationCurves()
+                } label: {
+                    Text("Animation Curves")
+                }
             }.navigationTitle("Practices")
         }
     }
