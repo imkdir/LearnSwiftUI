@@ -1,157 +1,130 @@
 import SwiftUI
 
-// 1. Data Model
-struct ProductData {
-    static let colors = [Color.red, Color.orange, Color.yellow, Color.green, Color.blue]
-    static let icons = ["airplane", "studentdesk", "hourglass", "headphones", "lightbulb"]
+enum ShoppingItem: String, CaseIterable, Identifiable {
+    case airplane, studentdesk, hourglass, headphones, lightbulb
+    
+    var id: String {
+        rawValue
+    }
+    
+    var color: Color {
+        switch self {
+        case .airplane:     Color.blue
+        case .studentdesk:  Color.orange
+        case .hourglass:    Color.yellow
+        case .headphones:   Color.cyan
+        case .lightbulb:    Color.indigo
+        }
+    }
+    
+    static let size: CGFloat = 50
 }
 
-// 2. A specific struct for the items flying into the cart
-// Using Identifiable ensures SwiftUI tracks the transition correctly for each unique click.
-struct FlyingItem: Identifiable {
+struct CartItem: Identifiable {
     let id = UUID()
-    let index: Int
+    let item: ShoppingItem
     let anchor: Anchor<CGPoint>
 }
 
-// 3. Consolidated PreferenceKey
-struct ItemAnchorKey: PreferenceKey {
-    static var defaultValue: Anchor<CGPoint>? { nil }
+struct AnchorKey<A>: PreferenceKey {
+    typealias Value = Anchor<A>?
+    static var defaultValue: Value { nil }
     
-    static func reduce(value: inout Anchor<CGPoint>?, nextValue: () -> Anchor<CGPoint>?) {
-        // We only care about the specific item being tapped,
-        // so standard reduction isn't strictly necessary here,
-        // but taking the last non-nil value is safe.
+    static func reduce(value: inout Value, nextValue: () -> Value) {
         value = nextValue() ?? value
     }
 }
 
+extension View {
+    func overlayWithAnchor<A, V: View>(value: Anchor<A>.Source, transform: @escaping (Anchor<A>) -> V) -> some View {
+        anchorPreference(key: AnchorKey<A>.self, value: value, transform: { $0 })
+            .overlayPreferenceValue(AnchorKey<A>.self) { anchor in
+                transform(anchor!)
+            }
+    }
+}
+
 struct ShoppingItemView: View {
-    let index: Int
+    let item: ShoppingItem
     
     var body: some View {
         RoundedRectangle(cornerRadius: 5)
-            .fill(ProductData.colors[index % ProductData.colors.count])
-            .frame(width: 50, height: 50)
+            .fill(item.color)
+            .frame(width: ShoppingItem.size, height: ShoppingItem.size)
             .overlay {
-                Image(systemName: ProductData.icons[index % ProductData.icons.count])
+                Image(systemName: item.rawValue)
                     .foregroundStyle(.white)
             }
     }
 }
 
 struct ShoppingCart: View {
-    // We keep track of items "in flight" separate from the total count
-    // to prevent the view hierarchy from growing infinitely.
-    @State private var flyingItems: [FlyingItem] = []
-    @State private var cartCount: Int = 0
+    @State private var cartItems: [CartItem] = []
     
     var body: some View {
         VStack {
-            // Product Row
             HStack(spacing: 20) {
-                ForEach(0..<5) { index in
-                    ShoppingItemView(index: index)
-                        // Capture the anchor for this specific item
-                        .anchorPreference(key: ItemAnchorKey.self, value: .center) { $0 }
-                        // Read the anchor immediately to allow interaction
-                        .overlayPreferenceValue(ItemAnchorKey.self) { anchor in
-                            GeometryReader { proxy in
-                                Color.clear
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        if let anchor = anchor {
-                                            addToCart(index: index, anchor: anchor)
-                                        }
-                                    }
-                            }
+                ForEach(ShoppingItem.allCases) { item in
+                    ShoppingItemView(item: item)
+                        .overlayWithAnchor(value: .center) { anchor in
+                            Color.clear
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    addToCart(item: item, anchor: anchor)
+                                }
                         }
                 }
             }
+            .padding(20)
             
             Spacer()
-                .frame(height: 140)
-            
-            // Cart Area
-            CartIconView(count: cartCount)
-                .background(
-                    // We use the background to establish the coordinate space for the flight
-                    GeometryReader { proxy in
-                        ZStack {
-                            ForEach(flyingItems) { item in
-                                ShoppingItemView(index: item.index)
-                                    // The animation happens on insertion
-                                    .transition(
-                                        .asymmetric(
-                                            insertion: .offset(
-                                                x: -getOffset(for: item.anchor, in: proxy).x,
-                                                y: -getOffset(for: item.anchor, in: proxy).y
-                                            ).combined(with: .opacity),
-                                            removal: .identity
-                                        )
-                                    )
-                            }
-                        }
-                        // Center the flying items on the cart
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                    }
-                )
-        }
-    }
-    
-    // Helper to calculate distance from the item to the cart
-    private func getOffset(for anchor: Anchor<CGPoint>, in proxy: GeometryProxy) -> CGPoint {
-        let sourcePoint = proxy[anchor]
-        let centerPoint = CGPoint(x: proxy.size.width / 2, y: proxy.size.height / 2)
-        return CGPoint(x: centerPoint.x - sourcePoint.x, y: centerPoint.y - sourcePoint.y)
-    }
-    
-    private func addToCart(index: Int, anchor: Anchor<CGPoint>) {
-        let newItem = FlyingItem(index: index, anchor: anchor)
-        
-        withAnimation(.bouncy(duration: 0.6)) {
-            flyingItems.append(newItem)
-        }
-        
-        // Logic to "Land" the item:
-        // After the animation duration, remove the flying view and increment the counter.
-        // This prevents the ZStack from holding thousands of views if the user clicks a lot.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            // Remove the specific item using ID to be safe
-            if let _ = flyingItems.firstIndex(where: { $0.id == newItem.id }) {
-                _ = flyingItems.removeFirst() // Simple FIFO removal for visual cleanup
-                withAnimation {
-                    cartCount += 1
+                .overlay {
+                    LoadingIndicator() 
                 }
+            
+            ScrollView(.horizontal) {
+                HStack {
+                    ForEach(cartItems) {
+                        ShoppingItemView(item: $0.item)
+                            .modifier(AppearFrom(anchor: $0.anchor, animation: .bouncy))
+                            .frame(width: ShoppingItem.size, height: ShoppingItem.size)
+                    }
+                }
+                .animation(.bouncy, value: cartItems.count)
+                .padding(20)
             }
+            .scrollClipDisabled()
+        }
+        .padding(.vertical)
+    }
+    
+    private func addToCart(item: ShoppingItem, anchor: Anchor<CGPoint>) {
+        let newItem = CartItem(item: item, anchor: anchor)
+        cartItems.insert(newItem, at: 0)
+    }
+}
+
+fileprivate struct AppearFrom: ViewModifier {
+    let anchor: Anchor<CGPoint>
+    let animation: Animation
+    
+    @State private var didAppear: Bool = false
+    
+    func body(content: Content) -> some View {
+        GeometryReader { proxy in
+            content
+                .offset(didAppear ? .zero : .init(point: proxy[anchor]))
+                .onAppear {
+                    withAnimation(animation) {
+                        didAppear = true
+                    }
+                }
         }
     }
 }
 
-// Extracted Subview for the Cart Icon
-struct CartIconView: View {
-    let count: Int
-    
-    var body: some View {
-        RoundedRectangle(cornerRadius: 15)
-            .fill(.regularMaterial)
-            .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 5)
-            .frame(width: 80, height: 80)
-            .overlay(alignment: .topTrailing) {
-                if count > 0 {
-                    Text("\(count)")
-                        .font(.caption.bold())
-                        .foregroundStyle(.white)
-                        .padding(8)
-                        .background(Circle().fill(Color.red))
-                        .offset(x: 10, y: -10)
-                        .transition(.scale.combined(with: .opacity))
-                }
-            }
-            .overlay {
-                Image(systemName: "cart.fill")
-                    .font(.largeTitle)
-                    .foregroundStyle(.secondary)
-            }
+extension CGSize {
+    fileprivate init(point: CGPoint) {
+        self.init(width: point.x, height: point.y)
     }
 }
