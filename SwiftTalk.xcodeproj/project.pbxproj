@@ -29,6 +29,7 @@
 		038BE8842EEE8E0300CC3968 /* PracticeList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8832EEE8E0300CC3968 /* PracticeList.swift */; };
 		038BE8862EEF8D0900CC3968 /* ShakeIt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8852EEF8CFF00CC3968 /* ShakeIt.swift */; };
 		038BE8882EEFA18100CC3968 /* AnimationCurves.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8872EEFA17C00CC3968 /* AnimationCurves.swift */; };
+		038BE88A2EEFCF6B00CC3968 /* ShoppingCart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8892EEFCF5F00CC3968 /* ShoppingCart.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +53,7 @@
 		038BE8832EEE8E0300CC3968 /* PracticeList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeList.swift; sourceTree = "<group>"; };
 		038BE8852EEF8CFF00CC3968 /* ShakeIt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShakeIt.swift; sourceTree = "<group>"; };
 		038BE8872EEFA17C00CC3968 /* AnimationCurves.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimationCurves.swift; sourceTree = "<group>"; };
+		038BE8892EEFCF5F00CC3968 /* ShoppingCart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingCart.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +101,7 @@
 				038BE87D2EED94F300CC3968 /* LoadingIndicator.swift */,
 				038BE8852EEF8CFF00CC3968 /* ShakeIt.swift */,
 				038BE8872EEFA17C00CC3968 /* AnimationCurves.swift */,
+				038BE8892EEFCF5F00CC3968 /* ShoppingCart.swift */,
 				038BE8832EEE8E0300CC3968 /* PracticeList.swift */,
 				038BE86D2EEBD39400CC3968 /* SwiftTalk */,
 			);
@@ -207,6 +210,7 @@
 				038BE86F2EEBD3BF00CC3968 /* Store.swift in Sources */,
 				038BE8662EEBB32A00CC3968 /* ContentView.swift in Sources */,
 				038BE8882EEFA18100CC3968 /* AnimationCurves.swift in Sources */,
+				038BE88A2EEFCF6B00CC3968 /* ShoppingCart.swift in Sources */,
 				038BE8792EEC141B00CC3968 /* Session.swift in Sources */,
 				038BE8822EEE8AFA00CC3968 /* FlowLayout.swift in Sources */,
 				038BE8672EEBB32A00CC3968 /* CurrencyConverter.swift in Sources */,
