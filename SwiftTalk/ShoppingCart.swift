@@ -23,7 +23,7 @@ enum ShoppingItem: String, CaseIterable, Identifiable {
 struct CartItem: Identifiable {
     let id = UUID()
     let item: ShoppingItem
-    let anchor: Anchor<CGPoint>
+    let anchor: Anchor<CGPoint>?
 }
 
 struct AnchorKey<A>: PreferenceKey {
@@ -36,10 +36,10 @@ struct AnchorKey<A>: PreferenceKey {
 }
 
 extension View {
-    func overlayWithAnchor<A, V: View>(value: Anchor<A>.Source, transform: @escaping (Anchor<A>) -> V) -> some View {
+    func overlayWithAnchor<A, V: View>(value: Anchor<A>.Source, transform: @escaping (Anchor<A>?) -> V) -> some View {
         anchorPreference(key: AnchorKey<A>.self, value: value, transform: { $0 })
             .overlayPreferenceValue(AnchorKey<A>.self) { anchor in
-                transform(anchor!)
+                transform(anchor)
             }
     }
 }
@@ -61,6 +61,9 @@ struct ShoppingItemView: View {
 struct ShoppingCart: View {
     @State private var cartItems: [CartItem] = []
     
+    @State private var dropZoneFrame: CGRect = .zero
+    @State private var isHoveringOverCart = false
+    
     var body: some View {
         VStack {
             HStack(spacing: 20) {
@@ -73,13 +76,27 @@ struct ShoppingCart: View {
                                     addToCart(item: item, anchor: anchor)
                                 }
                         }
+                        .modifier(Draggable(
+                            coordinateSpace: "PageSpace",
+                            dropZoneFrame: dropZoneFrame,
+                            onDragChanged: { hovering in
+                                withAnimation {
+                                    isHoveringOverCart = hovering
+                                }
+                            }, onDrop: {
+                                withAnimation {
+                                    addToCart(item: item, anchor: nil)
+                                }
+                            }
+                        ))
                 }
             }
             .padding(20)
+            .zIndex(2)
             
             Spacer()
                 .overlay {
-                    LoadingIndicator() 
+                    LoadingIndicator()
                 }
             
             ScrollView(.horizontal) {
@@ -89,37 +106,96 @@ struct ShoppingCart: View {
                             .modifier(AppearFrom(anchor: $0.anchor, animation: .bouncy))
                             .frame(width: ShoppingItem.size, height: ShoppingItem.size)
                     }
+                    cartItems.isEmpty ? Spacer() : nil
                 }
                 .animation(.bouncy, value: cartItems.count)
-                .padding(20)
+                .frame(height: ShoppingItem.size)
             }
             .scrollClipDisabled()
+            .zIndex(1)
+            .padding(20)
+            .background(isHoveringOverCart ? Color(uiColor: .secondarySystemBackground) : nil)
+            .onGeometryChange(for: CGRect.self) { proxy in
+                proxy.frame(in: .named("PageSpace"))
+            } action: { newValue in
+                dropZoneFrame = newValue
+            }
         }
         .padding(.vertical)
+        .coordinateSpace(name: "PageSpace")
     }
     
-    private func addToCart(item: ShoppingItem, anchor: Anchor<CGPoint>) {
+    private func addToCart(item: ShoppingItem, anchor: Anchor<CGPoint>?) {
         let newItem = CartItem(item: item, anchor: anchor)
         cartItems.insert(newItem, at: 0)
     }
 }
 
 fileprivate struct AppearFrom: ViewModifier {
-    let anchor: Anchor<CGPoint>
+    let anchor: Anchor<CGPoint>?
     let animation: Animation
     
     @State private var didAppear: Bool = false
     
     func body(content: Content) -> some View {
-        GeometryReader { proxy in
-            content
-                .offset(didAppear ? .zero : .init(point: proxy[anchor]))
-                .onAppear {
-                    withAnimation(animation) {
-                        didAppear = true
+        if let anchor {
+            GeometryReader { proxy in
+                content
+                    .offset(didAppear ? .zero : .init(point: proxy[anchor]))
+                    .onAppear {
+                        withAnimation(animation) {
+                            didAppear = true
+                        }
                     }
-                }
+            }
+        } else {
+            content
         }
+    }
+}
+
+fileprivate struct Draggable: ViewModifier {
+    let coordinateSpace: String
+    let dropZoneFrame: CGRect
+    
+    var onDragChanged: (Bool) -> Void
+    var onDrop: () -> Void
+    
+    @GestureState private var translation: CGSize = .zero
+    @State private var isHovering = false
+    
+    func body(content: Content) -> some View {
+        ZStack {
+            content
+                .opacity(translation == .zero ? 1.0 : 0.8)
+            if translation != .zero {
+                content
+                    .offset(translation)
+                    .zIndex(1)
+                    .transition(.offset(-translation))
+            }
+        }
+        .animation(.interactiveSpring(response: 0.3, dampingFraction: 0.7), value: translation)
+        .highPriorityGesture(
+            DragGesture(minimumDistance: 1, coordinateSpace: .named(coordinateSpace))
+                .updating($translation) { value, state, _ in
+                    state = value.translation
+                }
+                .onChanged({ value in
+                    let isOver = dropZoneFrame.contains(value.location)
+                    if isOver != isHovering {
+                        isHovering = isOver
+                        onDragChanged(isOver)
+                    }
+                })
+                .onEnded({ value in
+                    if dropZoneFrame.contains(value.location) {
+                        onDrop()
+                    }
+                    isHovering = false
+                    onDragChanged(false)
+                })
+        )
     }
 }
 
@@ -127,4 +203,8 @@ extension CGSize {
     fileprivate init(point: CGPoint) {
         self.init(width: point.x, height: point.y)
     }
+}
+
+prefix func -(size: CGSize) -> CGSize {
+    CGSize(width: -size.width, height: -size.height)
 }
