@@ -43,7 +43,7 @@ struct PracticeList: View {
                     Text("Shopping Cart")
                 }
                 NavigationLink {
-                    Stopwatch()
+                    StopwatchPage()
                 } label: {
                     Text("Stopwatch")
                 }
