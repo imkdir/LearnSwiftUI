@@ -23,24 +23,26 @@ enum ShoppingItem: String, CaseIterable, Identifiable {
 struct CartItem: Identifiable {
     let id = UUID()
     let item: ShoppingItem
-    let anchor: Anchor<CGPoint>?
+    let anchor: Anchor<CGPoint>
 }
 
-struct AnchorKey<A>: PreferenceKey {
-    typealias Value = Anchor<A>?
-    static var defaultValue: Value { nil }
+struct TaggedKey<Value, Tag>: PreferenceKey {
+    static var defaultValue: Value? { nil }
     
-    static func reduce(value: inout Value, nextValue: () -> Value) {
+    static func reduce(value: inout Value?, nextValue: () -> Value?) {
         value = nextValue() ?? value
     }
 }
 
 extension View {
-    func overlayWithAnchor<A, V: View>(value: Anchor<A>.Source, transform: @escaping (Anchor<A>?) -> V) -> some View {
-        anchorPreference(key: AnchorKey<A>.self, value: value, transform: { $0 })
-            .overlayPreferenceValue(AnchorKey<A>.self) { anchor in
-                transform(anchor)
+    func overlayWithAnchor<A, V: View>(value: Anchor<A>.Source, transform: @escaping (Anchor<A>) -> V) -> some View {
+        let key = TaggedKey<Anchor<A>, ()>.self
+        
+        return anchorPreference(key: key, value: value, transform: { $0 })
+            .overlayPreferenceValue(key) { anchor in
+                transform(anchor!)
             }
+            .preference(key: key, value: nil)
     }
 }
 
@@ -93,8 +95,7 @@ struct ShoppingCart: View {
                 HStack {
                     ForEach(cartItems) {
                         ShoppingItemView(item: $0.item)
-                            .modifier(AppearFrom(anchor: $0.anchor, animation: .bouncy))
-                            .frame(width: ShoppingItem.size, height: ShoppingItem.size)
+                            .flyIn(from: $0.anchor, animation: .bouncy)
                             .transition(.identity)
                     }
                 }
@@ -115,32 +116,38 @@ struct ShoppingCart: View {
         .coordinateSpace(name: "PageSpace")
     }
     
-    private func addToCart(item: ShoppingItem, anchor: Anchor<CGPoint>?) {
+    private func addToCart(item: ShoppingItem, anchor: Anchor<CGPoint>) {
         let newItem = CartItem(item: item, anchor: anchor)
         cartItems.insert(newItem, at: 0)
     }
 }
 
-fileprivate struct AppearFrom: ViewModifier {
-    let anchor: Anchor<CGPoint>?
+extension View {
+    func flyIn(from anchor: Anchor<CGPoint>, animation: Animation = .default) -> some View {
+        modifier(FlyFromAnchorModifier(anchor: anchor, animation: animation))
+    }
+}
+
+struct FlyFromAnchorModifier: ViewModifier {
+    let anchor: Anchor<CGPoint>
     let animation: Animation
     
-    @State private var didAppear: Bool = false
+    @State private var isVisible: Bool = false
+    @State private var startOffset: CGSize = .zero
     
     func body(content: Content) -> some View {
-        if let anchor {
-            GeometryReader { proxy in
-                content
-                    .offset(didAppear ? .zero : .init(point: proxy[anchor]))
-                    .onAppear {
+        content
+            .offset(isVisible ? .zero : startOffset)
+            .background(content: {
+                GeometryReader { proxy in
+                    Color.clear.onAppear {
+                        startOffset = .init(point: proxy[anchor])
                         withAnimation(animation) {
-                            didAppear = true
+                            isVisible = true
                         }
                     }
-            }
-        } else {
-            content
-        }
+                }
+            })
     }
 }
 
@@ -149,7 +156,7 @@ fileprivate struct Draggable: ViewModifier {
     let dropZoneFrame: CGRect
     
     var onDragChanged: (Bool) -> Void
-    var onEnded: (Anchor<CGPoint>?, Bool) -> Void
+    var onEnded: (Anchor<CGPoint>, Bool) -> Void
     
     @GestureState private var translation: CGSize = .zero
     @State private var isHovering = false
