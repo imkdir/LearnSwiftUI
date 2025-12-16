@@ -176,13 +176,10 @@ struct FlowLayoutPlayground: View {
                     .frame(width: dividerWidth)
                 ScrollView {
                     CollectionLayoutView(data: items) {
-                        Text($0.value)
-                            .foregroundStyle($0.color)
-                            .padding(2)
-                            .border(Color.secondary)
+                        $0
                     } layout: { elements, containerSize, sizes in
                         var state = FLowLayout(containerSize: containerSize)
-                        var result: [Words.ID: CGSize] = [:]
+                        var result: [Bubble.ID: CGSize] = [:]
                         for element in elements {
                             let rect = state.add(element: sizes[element.id, default: .zero])
                             result[element.id] = .init(width: rect.origin.x, height: rect.origin.y)
@@ -205,17 +202,24 @@ struct FlowLayoutPlayground: View {
     }
 }
 
-struct Words: Identifiable {
+struct Bubble: Identifiable, View {
     let id = UUID()
     
     let value: String
     
-    var color: Color {
-        Color.fromString(value)
+    var body: some View {
+        Text(value)
+            .foregroundStyle(.white)
+            .padding(.horizontal, 4)
+            .padding(.vertical, 2)
+            .background {
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .fill(Color.blue)
+            }
     }
 }
 
-private let poorRichardQuotes: [Words] = [
+private let poorRichardQuotes: [Bubble] = [
     "Three may keep a secret, if two of them are dead.",
     "Early to bed and early to rise, makes a man healthy, wealthy and wise.",
     "Fish and visitors stink in three days.",
@@ -226,7 +230,7 @@ private let poorRichardQuotes: [Words] = [
     "There are no gains without pains.",
     "Well done is better than well said.",
     "Haste makes waste."
-].flatMap({ $0.components(separatedBy: " ") }).map(Words.init(value:))
+].flatMap({ $0.components(separatedBy: " ") }).map(Bubble.init(value:))
 
 extension Color {
     static func fromString(_ value: String) -> Color {

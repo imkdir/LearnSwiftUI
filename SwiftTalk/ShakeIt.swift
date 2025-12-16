@@ -40,8 +40,9 @@ struct ShakeIt: View {
                 .frame(width: 120, height: 120)
                 .modifier(ShakeEffect(shakes: shakes))
                 .animation(.bouncy, value: shakes)
-            Stepper("Shake It!", value: $shakes, in: 1...100)
-                .padding()
+                .onTapGesture {
+                    shakes += 1
+                }
         }
         .padding(20)
     }
