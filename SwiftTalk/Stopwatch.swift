@@ -12,6 +12,7 @@ struct Lap: Equatable {
     let index: Int
     let startTime: CFTimeInterval
     var endTime = CACurrentMediaTime()
+    var level: Level = .regular
     
     var timeInterval: CFTimeInterval {
         endTime - startTime
@@ -19,6 +20,24 @@ struct Lap: Equatable {
     
     var duration: Duration {
         .seconds(timeInterval)
+    }
+    
+    enum Level {
+        case regular, shortest, longest
+        
+        var color: Color {
+            switch self {
+            case .regular:  .init(uiColor: .label)
+            case .shortest: .green
+            case .longest:  .red
+            }
+        }
+    }
+}
+
+extension Lap: Comparable {
+    static func < (lhs: Lap, rhs: Lap) -> Bool {
+        lhs.timeInterval < rhs.timeInterval
     }
 }
 
@@ -41,16 +60,17 @@ class Stopwatch {
         }))
     }
     
-    func toggle() {
-        if isRunning {
-            stopTimer()
-        } else {
-            if !hasLaps {
-                recordLap()
-            }
-            startTimer()
+    func stop() {
+        isRunning = false
+        stopTimer()
+    }
+    
+    func start() {
+        if !hasLaps {
+            recordLap()
         }
-        isRunning.toggle()
+        isRunning = true
+        startTimer()
     }
     
     private func stopTimer() {
@@ -72,12 +92,27 @@ class Stopwatch {
     }
     
     func recordLap() {
+        var laps = self.laps
         if let lap = laps.first {
             let new = Lap(index: laps.count+1, startTime: lap.endTime)
             laps.insert(new, at: 0)
         } else {
             laps.append(.init(index: 1, startTime: CACurrentMediaTime()))
         }
+        if laps.count > 2 {
+            var sample = Array(laps.dropFirst())
+            if let max = sample.max(), let min = sample.min(), max != min {
+                sample.enumerated().forEach { index, item in
+                    sample[index].level = switch item {
+                    case max: .longest
+                    case min: .shortest
+                    default: .regular
+                    }
+                }
+            }
+            laps = [laps[0]] + sample
+        }
+        self.laps = laps
     }
     
     func resetLaps() {
@@ -88,11 +123,21 @@ class Stopwatch {
         !laps.isEmpty
     }
     
+    var showLapButton: Bool {
+        isRunning || !hasLaps
+    }
+    
     static var durationTimeFormat: Duration.TimeFormatStyle {
         .time(pattern: .minuteSecond(
             padMinuteToLength: 2,
             fractionalSecondsLength: 2
         ))
+    }
+}
+
+extension View {
+    func visible(_ condition: Bool) -> some View {
+        opacity(condition ? 1 : 0)
     }
 }
 
@@ -110,34 +155,45 @@ struct StopwatchPage: View {
                 .monospacedDigit()
             Spacer()
             HStack {
-                if stopwatch.isRunning {
+                ZStack {
                     Button {
                         stopwatch.recordLap()
                     } label: {
                         Text("Lap")
                             .modifier(SyncSize(maxSize: $maxLabelSize))
                     }
-                    .foregroundStyle(.white)
-                } else {
+                    .disabled(!stopwatch.isRunning)
+                    .visible(stopwatch.showLapButton)
                     Button {
                         stopwatch.resetLaps()
                     } label: {
-                        Text(stopwatch.hasLaps ? "Reset" : "Lap")
+                        Text("Reset")
                             .modifier(SyncSize(maxSize: $maxLabelSize))
                     }
-                    .disabled(!stopwatch.hasLaps)
-                    .foregroundStyle(.white)
+                    .visible(!stopwatch.showLapButton)
                 }
+                .foregroundStyle(.white)
                 
                 Spacer()
                 
-                Button {
-                    stopwatch.toggle()
-                } label: {
-                    Text(stopwatch.isRunning ? "Stop" : "Start")
-                        .modifier(SyncSize(maxSize: $maxLabelSize))
+                ZStack {
+                    Button {
+                        stopwatch.stop()
+                    } label: {
+                        Text("Stop")
+                            .modifier(SyncSize(maxSize: $maxLabelSize))
+                    }
+                    .foregroundStyle(.red)
+                    .visible(stopwatch.isRunning)
+                    Button {
+                        stopwatch.start()
+                    } label: {
+                        Text("Start")
+                            .modifier(SyncSize(maxSize: $maxLabelSize))
+                    }
+                    .foregroundStyle(.green)
+                    .visible(!stopwatch.isRunning)
                 }
-                .foregroundStyle(stopwatch.isRunning ? .red : .green)
             }
             .buttonStyle(CircleStyle())
         }
@@ -154,7 +210,7 @@ struct StopwatchPage: View {
                         Spacer()
                         Text(lap.duration, format: Stopwatch.durationTimeFormat)
                             .monospacedDigit()
-                    }
+                    }.foregroundStyle(lap.level.color)
                 }
             }
             .listStyle(.plain)
@@ -184,6 +240,7 @@ struct SyncSize: ViewModifier {
     
     func body(content: Content) -> some View {
         content
+            .fixedSize()
             .onGeometryChange(for: CGFloat.self) { proxy in
                 max(proxy.size.width, proxy.size.height)
             } action: { newValue in
