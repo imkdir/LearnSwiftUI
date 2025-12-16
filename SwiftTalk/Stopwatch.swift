@@ -20,13 +20,6 @@ struct Lap: Equatable {
     var duration: Duration {
         .seconds(timeInterval)
     }
-    
-    static var format: Duration.TimeFormatStyle {
-        .time(pattern: .minuteSecond(
-            padMinuteToLength: 2,
-            fractionalSecondsLength: 2
-        ))
-    }
 }
 
 @Observable
@@ -35,7 +28,12 @@ class Stopwatch {
     private(set) var laps: [Lap] = []
     
     @ObservationIgnored
-    private var displayLink: CADisplayLink?
+    private var timer: Timer?
+    
+    deinit {
+        stopTimer()
+        print("stopwatch deinit")
+    }
     
     var totalDuration: Duration {
         .seconds(laps.reduce(into: 0, { accu, next in
@@ -47,38 +45,30 @@ class Stopwatch {
         if isRunning {
             stopTimer()
         } else {
+            if !hasLaps {
+                recordLap()
+            }
             startTimer()
         }
         isRunning.toggle()
     }
     
-    private func startTimer() {
-        if laps.isEmpty {
-            recordLap()
-        }
-        let proxy = WeakProxy(target: self)
-        let displayLink = CADisplayLink(
-            target: proxy,
-            selector: #selector(WeakProxy.handleFrame(_:))
-        )
-        displayLink.preferredFrameRateRange = .init(
-            minimum: 20, maximum: 30, preferred: 20
-        )
-        displayLink.add(to: .main, forMode: .common)
-        self.displayLink = displayLink
-    }
-    
-    fileprivate func updateFrame() {
-        guard hasLaps else { return }
-        
-        var lap = laps[0]
-        lap.endTime = CACurrentMediaTime()
-        laps[0] = lap
-    }
-    
     private func stopTimer() {
-        displayLink?.invalidate()
-        displayLink = nil
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    private func startTimer() {
+        let timer = Timer(timeInterval: 0.02, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            guard self.hasLaps else { return }
+            
+            var lap = self.laps[0]
+            lap.endTime = CACurrentMediaTime()
+            self.laps[0] = lap
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        self.timer = timer
     }
     
     func recordLap() {
@@ -98,21 +88,11 @@ class Stopwatch {
         !laps.isEmpty
     }
     
-    private class WeakProxy {
-        weak var target: Stopwatch?
-        
-        init(target: Stopwatch) {
-            self.target = target
-        }
-        
-        @objc
-        func handleFrame(_ link: CADisplayLink) {
-            if let target {
-                target.updateFrame()
-            } else {
-                link.invalidate()
-            }
-        }
+    static var durationTimeFormat: Duration.TimeFormatStyle {
+        .time(pattern: .minuteSecond(
+            padMinuteToLength: 2,
+            fractionalSecondsLength: 2
+        ))
     }
 }
 
@@ -120,12 +100,10 @@ struct StopwatchPage: View {
     @State private var maxLabelSize: CGFloat = 0
     private let stopwatch = Stopwatch()
     
-    
-    
     var header: some View {
         VStack {
             Spacer()
-            Text(stopwatch.totalDuration, format: Lap.format)
+            Text(stopwatch.totalDuration, format: Stopwatch.durationTimeFormat)
                 .lineLimit(1)
                 .font(.system(size: 100, weight: .thin))
                 .minimumScaleFactor(0.1)
@@ -174,7 +152,7 @@ struct StopwatchPage: View {
                     HStack {
                         Text("Lap \(lap.index)")
                         Spacer()
-                        Text(lap.duration, format: Lap.format)
+                        Text(lap.duration, format: Stopwatch.durationTimeFormat)
                             .monospacedDigit()
                     }
                 }

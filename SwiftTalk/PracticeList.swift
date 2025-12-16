@@ -7,47 +7,65 @@
 
 import SwiftUI
 
+enum Practice: String, Identifiable, CaseIterable {
+    case currencyConverter
+    case loadingIndicator
+    case flowLayoutPlayground
+    case shakeIt
+    case animationCurves
+    case shoppingCart
+    case stopwatchPage
+    
+    var id: Self {
+        self
+    }
+    
+    var title: String {
+        switch self {
+        case .currencyConverter:
+            "Currency Converter"
+        case .loadingIndicator:
+            "Loading Indicator"
+        case .flowLayoutPlayground:
+            "FlowLayout Playground"
+        case .shakeIt:
+            "Shake It!"
+        case .animationCurves:
+            "Animation Curves"
+        case .shoppingCart:
+            "Shopping Cart"
+        case .stopwatchPage:
+            "Stopwatch Page"
+        }
+    }
+}
+
 struct PracticeList: View {
     
     var body: some View {
         NavigationStack {
-            List {
-                NavigationLink {
+            List(Practice.allCases) {
+                NavigationLink($0.title, value: $0)
+            }
+            .navigationTitle("Practices")
+            .navigationDestination(for: Practice.self) {
+                switch $0 {
+                case .currencyConverter:
                     CurrencyConverter()
-                } label: {
-                    Text("Currency Converter")
-                }
-                NavigationLink {
+                case .loadingIndicator:
                     LoadingIndicator()
-                } label: {
-                    Text("Loading Indicator")
-                }
-                NavigationLink {
+                case .flowLayoutPlayground:
                     FlowLayoutPlayground()
-                } label: {
-                    Text("FlowLayout Playground")
-                }
-                NavigationLink {
+                case .shakeIt:
                     ShakeIt()
-                } label: {
-                    Text("Shake It!")
-                }
-                NavigationLink {
+                case .animationCurves:
                     AnimationCurves()
-                } label: {
-                    Text("Animation Curves")
-                }
-                NavigationLink {
+                case .shoppingCart:
                     ShoppingCart()
-                } label: {
-                    Text("Shopping Cart")
-                }
-                NavigationLink {
+                case .stopwatchPage:
                     StopwatchPage()
-                } label: {
-                    Text("Stopwatch")
                 }
-            }.navigationTitle("Practices")
+            }
         }
     }
 }
