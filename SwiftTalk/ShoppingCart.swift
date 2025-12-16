@@ -69,13 +69,6 @@ struct ShoppingCart: View {
             HStack(spacing: 20) {
                 ForEach(ShoppingItem.allCases) { item in
                     ShoppingItemView(item: item)
-                        .overlayWithAnchor(value: .center) { anchor in
-                            Color.clear
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    addToCart(item: item, anchor: anchor)
-                                }
-                        }
                         .modifier(Draggable(
                             coordinateSpace: "PageSpace",
                             dropZoneFrame: dropZoneFrame,
@@ -83,9 +76,9 @@ struct ShoppingCart: View {
                                 withAnimation {
                                     isHoveringOverCart = hovering
                                 }
-                            }, onDrop: {
+                            }, onEnded: { anchor, _ in
                                 withAnimation {
-                                    addToCart(item: item, anchor: nil)
+                                    addToCart(item: item, anchor: anchor)
                                 }
                             }
                         ))
@@ -95,9 +88,6 @@ struct ShoppingCart: View {
             .zIndex(2)
             
             Spacer()
-                .overlay {
-                    LoadingIndicator()
-                }
             
             ScrollView(.horizontal) {
                 HStack {
@@ -105,8 +95,8 @@ struct ShoppingCart: View {
                         ShoppingItemView(item: $0.item)
                             .modifier(AppearFrom(anchor: $0.anchor, animation: .bouncy))
                             .frame(width: ShoppingItem.size, height: ShoppingItem.size)
+                            .transition(.identity)
                     }
-                    cartItems.isEmpty ? Spacer() : nil
                 }
                 .animation(.bouncy, value: cartItems.count)
                 .frame(height: ShoppingItem.size)
@@ -159,43 +149,58 @@ fileprivate struct Draggable: ViewModifier {
     let dropZoneFrame: CGRect
     
     var onDragChanged: (Bool) -> Void
-    var onDrop: () -> Void
+    var onEnded: (Anchor<CGPoint>?, Bool) -> Void
     
     @GestureState private var translation: CGSize = .zero
     @State private var isHovering = false
+    
+    var anchorValue: Anchor<CGPoint>.Source {
+        .point(.init(x: translation.width, y: translation.height))
+    }
     
     func body(content: Content) -> some View {
         ZStack {
             content
                 .opacity(translation == .zero ? 1.0 : 0.8)
+                .overlayWithAnchor(value: anchorValue) { anchor in
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            onEnded(anchor, false)
+                        }
+                        .highPriorityGesture(
+                            DragGesture(
+                                minimumDistance: 1,
+                                coordinateSpace: .named(coordinateSpace)
+                            )
+                            .updating($translation) { value, state, _ in
+                                    state = value.translation
+                            }
+                            .onChanged({ value in
+                                let isOver = dropZoneFrame.contains(value.location)
+                                if isOver != isHovering {
+                                    isHovering = isOver
+                                    onDragChanged(isOver)
+                                }
+                            })
+                            .onEnded({ value in
+                                if dropZoneFrame.contains(value.location) {
+                                    onEnded(anchor, true)
+                                }
+                                isHovering = false
+                                onDragChanged(false)
+                            })
+                        )
+                }
             if translation != .zero {
                 content
                     .offset(translation)
                     .zIndex(1)
-                    .transition(.offset(-translation))
+                    .transition(.offset(isHovering ? .zero : -translation))
             }
         }
         .animation(.interactiveSpring(response: 0.3, dampingFraction: 0.7), value: translation)
-        .highPriorityGesture(
-            DragGesture(minimumDistance: 1, coordinateSpace: .named(coordinateSpace))
-                .updating($translation) { value, state, _ in
-                    state = value.translation
-                }
-                .onChanged({ value in
-                    let isOver = dropZoneFrame.contains(value.location)
-                    if isOver != isHovering {
-                        isHovering = isOver
-                        onDragChanged(isOver)
-                    }
-                })
-                .onEnded({ value in
-                    if dropZoneFrame.contains(value.location) {
-                        onDrop()
-                    }
-                    isHovering = false
-                    onDragChanged(false)
-                })
-        )
+        
     }
 }
 
