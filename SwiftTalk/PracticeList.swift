@@ -42,6 +42,11 @@ struct PracticeList: View {
                 } label: {
                     Text("Shopping Cart")
                 }
+                NavigationLink {
+                    Stopwatch()
+                } label: {
+                    Text("Stopwatch")
+                }
             }.navigationTitle("Practices")
         }
     }
