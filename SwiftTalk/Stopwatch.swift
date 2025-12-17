@@ -173,8 +173,145 @@ struct Pointer: Shape {
     }
 }
 
+extension CGPoint {
+    init(angle: Angle, distance: CGFloat) {
+        self.init(
+            x: CGFloat(cos(angle.radians)) * distance,
+            y: CGFloat(sin(angle.radians)) * distance
+        )
+    }
+    
+    var size: CGSize {
+        .init(width: x, height: y)
+    }
+}
+
+struct AnalogClockLabels: View {
+    let numbers: [Int]
+    
+    var body: some View {
+        GeometryReader { proxy in
+            let radius = proxy.size.width / 2.0
+                        
+            ZStack {
+                ForEach(numbers.enumerated(), id: \.offset) { idx, item in
+                    let degrees = 360 * Double(idx) / Double(numbers.count) - 90.0
+                    let point = CGPoint(angle: .degrees(degrees), distance: radius)
+                    
+                    Text(item.description)
+                        .offset(point.size)
+                }
+                Color.clear
+            }.aspectRatio(1, contentMode: .fit)
+        }
+    }
+}
+
+struct AnalogClockTicks: View {
+    let numberOfMajorTick: Int
+    let subdivisionCount: Int
+    let majorTickSize: CGSize
+    
+    var numberOfMajorAndMinorTicks: Int {
+        numberOfMajorTick * subdivisionCount
+    }
+    
+    func tick(at index: Int) -> some View {
+        VStack {
+            Rectangle()
+                .fill(Color.white.opacity(index % (5 * subdivisionCount) == 0 ? 1 : 0.4))
+                .frame(
+                    width: majorTickSize.width,
+                    height: (index % subdivisionCount == 0 ? 1 : 0.5) * majorTickSize.height
+                )
+            Spacer()
+        }
+        .rotationEffect(.degrees(Double(index)/Double(numberOfMajorAndMinorTicks) * 360.0))
+    }
+    
+    var body: some View {
+        ZStack {
+            ForEach(Array(0..<numberOfMajorAndMinorTicks), id: \.self) {
+                tick(at: $0)
+            }
+            Color.clear
+        }.aspectRatio(1, contentMode: .fit)
+    }
+}
+
+struct AnalogClock: View {
+    let stopwatch: Stopwatch
+    
+    var body: some View {
+        ZStack {
+            ZStack {
+                AnalogClockTicks(
+                    numberOfMajorTick: 60,
+                    subdivisionCount: 5,
+                    majorTickSize: .init(width: 2, height: 14)
+                )
+                AnalogClockLabels(
+                    numbers: [60] + stride(from: 5, through: 55, by: 5)
+                )
+                .font(.title)
+                .padding(35)
+            }.overlay {
+                VStack(spacing: 0) {
+                    Spacer()
+                    ZStack {
+                        AnalogClockTicks(
+                            numberOfMajorTick: 30,
+                            subdivisionCount: 2,
+                            majorTickSize: .init(width: 2, height: 10)
+                        )
+                        AnalogClockLabels(
+                            numbers: [30] + stride(from: 5, through: 25, by: 5)
+                        )
+                        .fontWeight(.regular)
+                        .padding(22)
+                        Pointer()
+                            .stroke(Color.orange, lineWidth: 1.5)
+                            .rotationEffect(.degrees(stopwatch.totalTime * (360 / (60 * 30))))
+                    }
+                    .frame(width: 90, height: 90)
+                    .padding(.bottom, 12)
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        DigitalClock(stopwatch: stopwatch)
+                            .font(.system(size: 20))
+                        Spacer()
+                    }
+                    .padding(.bottom, 12)
+                    Spacer()
+                }
+            }
+            
+            stopwatch.lapTime.map({
+                Pointer()
+                    .stroke(Color.blue, lineWidth: 2)
+                    .rotationEffect(.degrees($0 * (360 / 60)))
+            })
+            Pointer()
+                .stroke(Color.orange, lineWidth: 2)
+                .rotationEffect(.degrees(stopwatch.totalTime * (360 / 60)))
+            Color.clear
+        }.aspectRatio(1, contentMode: .fit)
+    }
+}
+
+struct DigitalClock: View {
+    let stopwatch: Stopwatch
+    
+    var body: some View {
+        Text(stopwatch.totalDuration, format: Stopwatch.durationTimeFormat)
+            .lineLimit(1)
+            .monospacedDigit()
+    }
+}
+
 struct Clock: View {
-    enum Style: Int, CaseIterable, Identifiable {
+    enum Style: String, CaseIterable, Identifiable {
         case digital, analog
         
         var id: Self { self }
@@ -183,44 +320,17 @@ struct Clock: View {
     let stopwatch: Stopwatch
     let style: Style
     
-    func tick(at tick: Int) -> some View {
-        VStack {
-            Rectangle()
-                .fill(Color.white.opacity(tick % 20 == 0 ? 1 : 0.4))
-                .frame(width: 2, height: (tick % 4 == 0 ? 12 : 6))
-            Spacer()
-        }
-        .rotationEffect(.degrees(Double(tick)/240.0 * 360.0))
-    }
-    
     var body: some View {
         switch style {
         case .digital:
-            Text(stopwatch.totalDuration, format: Stopwatch.durationTimeFormat)
-                .lineLimit(1)
+            DigitalClock(stopwatch: stopwatch)
                 .font(.system(size: 100, weight: .thin))
                 .minimumScaleFactor(0.1)
-                .monospacedDigit()
-//                .border(Color.red)
+                .padding(.horizontal)
         case .analog:
-            ZStack {
-                ForEach(0..<240) {
-                    tick(at: $0)
-                }
-                stopwatch.lapTime.map({
-                    Pointer()
-                        .stroke(Color.blue, lineWidth: 2)
-                        .rotationEffect(.degrees($0 * 6))
-                })
-                Pointer()
-                    .stroke(Color.orange, lineWidth: 2)
-                    .rotationEffect(.degrees(stopwatch.totalTime * 6))
-                Color.clear
-            }
-            .aspectRatio(1, contentMode: .fill)
-//            .border(Color.blue)
-            .padding(30)
-            .padding(.bottom, 50)
+            AnalogClock(stopwatch: stopwatch)
+                .padding(10)
+                .padding(.bottom, 40)
         }
     }
 }
@@ -240,9 +350,9 @@ struct StopwatchPage: View {
         .tabViewStyle(.page)
         .overlay(alignment: .bottom) {
             actionStack
+                .padding(.horizontal)
         }
         .aspectRatio(1, contentMode: .fill)
-//        .border(Color.green)
     }
     
     private var actionStack: some View {
@@ -302,7 +412,6 @@ struct StopwatchPage: View {
             }
         }
         .listStyle(.plain)
-//        .border(.yellow)
     }
     
     var body: some View {
