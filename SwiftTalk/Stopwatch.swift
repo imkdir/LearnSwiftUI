@@ -49,15 +49,19 @@ class Stopwatch {
     @ObservationIgnored
     private var timer: Timer?
     
-    deinit {
-        stopTimer()
-        print("stopwatch deinit")
+    var totalDuration: Duration {
+        .seconds(totalTime)
     }
     
-    var totalDuration: Duration {
-        .seconds(laps.reduce(into: 0, { accu, next in
-            accu += next.timeInterval
-        }))
+    var totalTime: Double {
+        laps.last.map({ CACurrentMediaTime() - $0.startTime }) ?? 0
+    }
+    
+    var lapTime: Double? {
+        guard laps.count > 1 else {
+            return nil
+        }
+        return laps.first?.timeInterval
     }
     
     func stop() {
@@ -67,10 +71,15 @@ class Stopwatch {
     
     func start() {
         if !hasLaps {
-            recordLap()
+            let startTime = CACurrentMediaTime()
+            self.laps = [Lap(index: 1, startTime: startTime)]
         }
         isRunning = true
         startTimer()
+    }
+    
+    func reset() {
+        laps.removeAll()
     }
     
     private func stopTimer() {
@@ -96,8 +105,6 @@ class Stopwatch {
         if let lap = laps.first {
             let new = Lap(index: laps.count+1, startTime: lap.endTime)
             laps.insert(new, at: 0)
-        } else {
-            laps.append(.init(index: 1, startTime: CACurrentMediaTime()))
         }
         if laps.count > 2 {
             var sample = Array(laps.dropFirst())
@@ -113,10 +120,6 @@ class Stopwatch {
             laps = [laps[0]] + sample
         }
         self.laps = laps
-    }
-    
-    func resetLaps() {
-        laps.removeAll()
     }
     
     var hasLaps: Bool {
@@ -141,79 +144,171 @@ extension View {
     }
 }
 
-struct StopwatchPage: View {
-    @State private var maxLabelSize: CGFloat = 0
-    private let stopwatch = Stopwatch()
+extension CGRect {
+    var center: CGPoint {
+        .init(x: midX, y: midY)
+    }
     
-    var header: some View {
+    init(center: CGPoint, radius: CGFloat) {
+        self = .init(
+            x: center.x - radius,
+            y: center.y - radius,
+            width: radius * 2.0,
+            height: radius * 2.0
+        )
+    }
+}
+
+struct Pointer: Shape {
+    let circleRadius: CGFloat = 3.0
+    
+    func path(in rect: CGRect) -> Path {
+        Path { p in
+            p.move(to: .init(x: rect.midX, y: rect.minY))
+            p.addLine(to: .init(x: rect.midX, y: rect.midY - circleRadius))
+            p.addEllipse(in: .init(center: rect.center, radius: circleRadius))
+            p.move(to: .init(x: rect.midX, y: rect.midY + circleRadius))
+            p.addLine(to: .init(x: rect.midX, y: rect.midY + rect.height / 10.0))
+        }
+    }
+}
+
+struct Clock: View {
+    enum Style: Int, CaseIterable, Identifiable {
+        case digital, analog
+        
+        var id: Self { self }
+    }
+    
+    let stopwatch: Stopwatch
+    let style: Style
+    
+    func tick(at tick: Int) -> some View {
         VStack {
+            Rectangle()
+                .fill(Color.white.opacity(tick % 20 == 0 ? 1 : 0.4))
+                .frame(width: 2, height: (tick % 4 == 0 ? 12 : 6))
             Spacer()
+        }
+        .rotationEffect(.degrees(Double(tick)/240.0 * 360.0))
+    }
+    
+    var body: some View {
+        switch style {
+        case .digital:
             Text(stopwatch.totalDuration, format: Stopwatch.durationTimeFormat)
                 .lineLimit(1)
                 .font(.system(size: 100, weight: .thin))
                 .minimumScaleFactor(0.1)
                 .monospacedDigit()
-            Spacer()
-            HStack {
-                ZStack {
-                    Button {
-                        stopwatch.recordLap()
-                    } label: {
-                        Text("Lap")
-                            .modifier(SyncSize(maxSize: $maxLabelSize))
-                    }
-                    .disabled(!stopwatch.isRunning)
-                    .visible(stopwatch.showLapButton)
-                    Button {
-                        stopwatch.resetLaps()
-                    } label: {
-                        Text("Reset")
-                            .modifier(SyncSize(maxSize: $maxLabelSize))
-                    }
-                    .visible(!stopwatch.showLapButton)
+//                .border(Color.red)
+        case .analog:
+            ZStack {
+                ForEach(0..<240) {
+                    tick(at: $0)
                 }
-                .foregroundStyle(.white)
-                
-                Spacer()
-                
-                ZStack {
-                    Button {
-                        stopwatch.stop()
-                    } label: {
-                        Text("Stop")
-                            .modifier(SyncSize(maxSize: $maxLabelSize))
-                    }
-                    .foregroundStyle(.red)
-                    .visible(stopwatch.isRunning)
-                    Button {
-                        stopwatch.start()
-                    } label: {
-                        Text("Start")
-                            .modifier(SyncSize(maxSize: $maxLabelSize))
-                    }
-                    .foregroundStyle(.green)
-                    .visible(!stopwatch.isRunning)
-                }
+                stopwatch.lapTime.map({
+                    Pointer()
+                        .stroke(Color.blue, lineWidth: 2)
+                        .rotationEffect(.degrees($0 * 6))
+                })
+                Pointer()
+                    .stroke(Color.orange, lineWidth: 2)
+                    .rotationEffect(.degrees(stopwatch.totalTime * 6))
+                Color.clear
             }
-            .buttonStyle(CircleStyle())
+            .aspectRatio(1, contentMode: .fill)
+//            .border(Color.blue)
+            .padding(30)
+            .padding(.bottom, 50)
         }
-        .padding()
+    }
+}
+
+struct StopwatchPage: View {
+    @State private var maxLabelSize: CGFloat = 0
+    @State private var selectedStyle: Clock.Style = .digital
+    private let stopwatch = Stopwatch()
+    
+    var header: some View {
+        TabView(selection: $selectedStyle) {
+            ForEach(Clock.Style.allCases) { style in
+                Clock(stopwatch: stopwatch, style: style)
+                    .tag(style)
+            }
+        }
+        .tabViewStyle(.page)
+        .overlay(alignment: .bottom) {
+            actionStack
+        }
+        .aspectRatio(1, contentMode: .fill)
+//        .border(Color.green)
+    }
+    
+    private var actionStack: some View {
+        HStack {
+            ZStack {
+                Button {
+                    stopwatch.recordLap()
+                } label: {
+                    Text("Lap")
+                        .modifier(SyncSize(maxSize: $maxLabelSize))
+                }
+                .disabled(!stopwatch.isRunning)
+                .visible(stopwatch.showLapButton)
+                Button {
+                    stopwatch.reset()
+                } label: {
+                    Text("Reset")
+                        .modifier(SyncSize(maxSize: $maxLabelSize))
+                }
+                .visible(!stopwatch.showLapButton)
+            }
+            .foregroundStyle(.white)
+            
+            Spacer()
+            
+            ZStack {
+                Button {
+                    stopwatch.stop()
+                } label: {
+                    Text("Stop")
+                        .modifier(SyncSize(maxSize: $maxLabelSize))
+                }
+                .foregroundStyle(.red)
+                .visible(stopwatch.isRunning)
+                Button {
+                    stopwatch.start()
+                } label: {
+                    Text("Start")
+                        .modifier(SyncSize(maxSize: $maxLabelSize))
+                }
+                .foregroundStyle(.green)
+                .visible(!stopwatch.isRunning)
+            }
+        }
+        .buttonStyle(CircleStyle())
+    }
+    
+    var table: some View {
+        List {
+            ForEach(stopwatch.laps, id: \.index) { lap in
+                HStack {
+                    Text("Lap \(lap.index)")
+                    Spacer()
+                    Text(lap.duration, format: Stopwatch.durationTimeFormat)
+                        .monospacedDigit()
+                }.foregroundStyle(lap.level.color)
+            }
+        }
+        .listStyle(.plain)
+//        .border(.yellow)
     }
     
     var body: some View {
         VStack {
             header
-            List {
-                ForEach(stopwatch.laps, id: \.index) { lap in
-                    HStack {
-                        Text("Lap \(lap.index)")
-                        Spacer()
-                        Text(lap.duration, format: Stopwatch.durationTimeFormat)
-                            .monospacedDigit()
-                    }.foregroundStyle(lap.level.color)
-                }
-            }
-            .listStyle(.plain)
+            table
         }
         .preferredColorScheme(.dark)
     }
