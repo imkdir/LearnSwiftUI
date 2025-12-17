@@ -10,13 +10,8 @@ import Observation
 
 struct Lap: Equatable {
     let index: Int
-    let startTime: CFTimeInterval
-    var endTime = CACurrentMediaTime()
+    var timeInterval: CFTimeInterval = 0
     var level: Level = .regular
-    
-    var timeInterval: CFTimeInterval {
-        endTime - startTime
-    }
     
     var duration: Duration {
         .seconds(timeInterval)
@@ -43,18 +38,26 @@ extension Lap: Comparable {
 
 @Observable
 class Stopwatch {
-    private(set) var isRunning: Bool = false
+    private var startTime: CFTimeInterval?
+    private var additionalTime: CFTimeInterval = 0
+    
     private(set) var laps: [Lap] = []
     
     @ObservationIgnored
     private var timer: Timer?
+    
+    var isRunning: Bool {
+        startTime != nil
+    }
     
     var totalDuration: Duration {
         .seconds(totalTime)
     }
     
     var totalTime: Double {
-        laps.last.map({ CACurrentMediaTime() - $0.startTime }) ?? 0
+        laps.reduce(into: 0, { accu, next in
+            accu += next.timeInterval
+        })
     }
     
     var lapTime: Double? {
@@ -65,16 +68,17 @@ class Stopwatch {
     }
     
     func stop() {
-        isRunning = false
+        startTime = nil
+        additionalTime = laps[0].timeInterval        
         stopTimer()
     }
     
     func start() {
         if !hasLaps {
-            let startTime = CACurrentMediaTime()
-            self.laps = [Lap(index: 1, startTime: startTime)]
+            self.laps = [Lap(index: 1, timeInterval: 0)]
         }
-        isRunning = true
+        startTime = CACurrentMediaTime() - additionalTime
+        additionalTime = 0
         startTimer()
     }
     
@@ -89,23 +93,19 @@ class Stopwatch {
     
     private func startTimer() {
         let timer = Timer(timeInterval: 0.02, repeats: true) { [weak self] _ in
-            guard let self else { return }
-            guard self.hasLaps else { return }
-            
-            var lap = self.laps[0]
-            lap.endTime = CACurrentMediaTime()
-            self.laps[0] = lap
+            guard let self, let startTime else { return }
+            self.laps[0].timeInterval = CACurrentMediaTime() - startTime
         }
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
     }
     
     func recordLap() {
+        self.startTime = CACurrentMediaTime()
+        self.laps.insert(Lap(index: laps.count+1), at: 0)
+        
         var laps = self.laps
-        if let lap = laps.first {
-            let new = Lap(index: laps.count+1, startTime: lap.endTime)
-            laps.insert(new, at: 0)
-        }
+
         if laps.count > 2 {
             var sample = Array(laps.dropFirst())
             if let max = sample.max(), let min = sample.min(), max != min {
@@ -119,6 +119,7 @@ class Stopwatch {
             }
             laps = [laps[0]] + sample
         }
+        
         self.laps = laps
     }
     
@@ -278,15 +279,15 @@ struct AnalogClock: View {
                     Spacer()
                     HStack {
                         Spacer()
-                        DigitalClock(stopwatch: stopwatch)
-                            .font(.system(size: 20))
+                        Text(stopwatch.totalDuration, format: Stopwatch.durationTimeFormat)
+                            .font(.system(size: 24))
+                            .monospacedDigit()
                         Spacer()
                     }
                     .padding(.bottom, 12)
                     Spacer()
                 }
             }
-            
             stopwatch.lapTime.map({
                 Pointer()
                     .stroke(Color.blue, lineWidth: 2)
@@ -300,13 +301,11 @@ struct AnalogClock: View {
     }
 }
 
-struct DigitalClock: View {
-    let stopwatch: Stopwatch
-    
-    var body: some View {
-        Text(stopwatch.totalDuration, format: Stopwatch.durationTimeFormat)
+extension View {
+    func flexible(weight: Font.Weight = .regular, baseSize: CGFloat = 100) -> some View {
+        font(.system(size: baseSize, weight: weight))
+            .minimumScaleFactor(0.01)
             .lineLimit(1)
-            .monospacedDigit()
     }
 }
 
@@ -323,19 +322,22 @@ struct Clock: View {
     var body: some View {
         switch style {
         case .digital:
-            DigitalClock(stopwatch: stopwatch)
-                .font(.system(size: 100, weight: .thin))
-                .minimumScaleFactor(0.1)
-                .padding(.horizontal)
+            VStack {
+                Spacer()
+                Text(stopwatch.totalDuration, format: Stopwatch.durationTimeFormat)
+                    .flexible(weight: .thin)
+                    .monospacedDigit()
+                Spacer()
+            }
         case .analog:
             AnalogClock(stopwatch: stopwatch)
-                .padding(10)
-                .padding(.bottom, 40)
+                .scaleEffect(.init(width: 0.85, height: 0.85))
         }
     }
 }
 
 struct StopwatchPage: View {
+    @State private var containerWidth: CGFloat = 0
     @State private var maxLabelSize: CGFloat = 0
     @State private var selectedStyle: Clock.Style = .digital
     private let stopwatch = Stopwatch()
@@ -350,9 +352,9 @@ struct StopwatchPage: View {
         .tabViewStyle(.page)
         .overlay(alignment: .bottom) {
             actionStack
-                .padding(.horizontal)
         }
-        .aspectRatio(1, contentMode: .fill)
+        .padding(.horizontal)
+        .frame(height: containerWidth)
     }
     
     private var actionStack: some View {
@@ -419,6 +421,9 @@ struct StopwatchPage: View {
             header
             table
         }
+        .onGeometryChange(for: CGSize.self, of: { $0.size }, action: {
+            self.containerWidth = $0.width
+        })
         .preferredColorScheme(.dark)
     }
 }
