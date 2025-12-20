@@ -18,7 +18,7 @@ struct SlideBuilder {
     }
 }
 
-struct SlidesContainer<Theme: ViewModifier>: View {
+struct Presentation<Theme: ViewModifier>: View {
     var slides: [AnyView]
     var theme: Theme
     
@@ -53,16 +53,12 @@ struct SlidesContainer<Theme: ViewModifier>: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
-            slides[currentSlide]
+            SlideContainer(content: slides[currentSlide], theme: theme)
                 .environment(\.currentStep, currentStep)
                 .onPreferenceChange(SlideStepsCountKey.self) {
                     self.numberOfSteps = $0
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .modifier(theme)
-                .aspectRatio(16/9, contentMode: .fit)
-                .border(Color.secondary)
-            
+
             HStack {
                 Button(action: previousSlide) {
                     Image(systemName: "arrow.backward")
@@ -80,7 +76,28 @@ struct SlidesContainer<Theme: ViewModifier>: View {
     }
 }
 
-extension SlidesContainer where Theme == EmptyModifier {
+struct SlideContainer<Theme: ViewModifier>: View {
+    var size: CGSize = .init(width: 1920, height: 1080)
+    var content: AnyView
+    var theme: Theme
+    
+    private func scale(_ proxy: GeometryProxy) -> CGFloat {
+        let ps = proxy.size
+        return min(ps.width/size.width, ps.height/size.height)
+    }
+    
+    var body: some View {
+        GeometryReader { proxy in
+            content
+                .frame(width: size.width, height: size.height)
+                .modifier(theme)
+                .scaleEffect(scale(proxy))
+                .frame(width: proxy.size.width, height: proxy.size.height)
+        }
+    }
+}
+
+extension Presentation where Theme == EmptyModifier {
     init(@SlideBuilder slides: () -> [AnyView]) {
         self.theme = .identity
         self.slides = slides()
@@ -135,7 +152,7 @@ struct ImageSlide: View {
 struct Slides: View {
     
     var body: some View {
-        SlidesContainer(theme: BlueSky()) {
+        Presentation(theme: BlueSky()) {
             Text("Hello World!")
             ImageSlide(imageName: "tortoise")
         }
