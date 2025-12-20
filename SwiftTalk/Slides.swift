@@ -24,7 +24,7 @@ struct Presentation<Theme: ViewModifier>: View {
     
     @State private var currentSlide = 0
     @State private var currentStep = 0
-    @State private var numberOfSteps = 1
+    @State private var stepAnimations: [Animation] = []
     
     init(theme: Theme, @SlideBuilder slides: () -> [AnyView]) {
         self.theme = theme
@@ -32,22 +32,26 @@ struct Presentation<Theme: ViewModifier>: View {
     }
     
     private func nextSlide() {
-        if currentStep < numberOfSteps - 1 {
-            withAnimation(.bouncy) {
+        if currentStep < stepAnimations.count {
+            withAnimation(stepAnimations[currentStep]) {
                 currentStep += 1
             }
         } else if currentSlide < slides.count - 1 {
-            currentSlide += 1
+            withAnimation(.smooth) {
+                currentSlide += 1
+            }
             currentStep = 0
-            numberOfSteps = 1
+            stepAnimations.removeAll()
         }
     }
     
     private func previousSlide() {
         if currentSlide > 0 {
-            currentSlide -= 1
+            withAnimation(.smooth) {
+                currentSlide -= 1
+            }
             currentStep = 0
-            numberOfSteps = 1
+            stepAnimations.removeAll()
         }
     }
     
@@ -55,9 +59,11 @@ struct Presentation<Theme: ViewModifier>: View {
         ZStack(alignment: .bottom) {
             SlideContainer(content: slides[currentSlide], theme: theme)
                 .environment(\.currentStep, currentStep)
-                .onPreferenceChange(SlideStepsCountKey.self) {
-                    self.numberOfSteps = $0
+                .onPreferenceChange(SlideStepAnimationKey.self) {
+                    self.stepAnimations = $0
                 }
+                .id(currentSlide)
+                .transition(.offset(.zero))
 
             HStack {
                 Button(action: previousSlide) {
@@ -108,23 +114,34 @@ extension EnvironmentValues {
     @Entry var currentStep: Int = 0
 }
 
-struct SlideStepsCountKey: PreferenceKey {
-    static var defaultValue: Int = 1
+struct SlideStepAnimationKey: PreferenceKey {
+    static var defaultValue: [Animation] = []
     
-    static func reduce(value: inout Int, nextValue: () -> Int) {
+    static func reduce(value: inout [Animation], nextValue: () -> [Animation]) {
         value = nextValue()
     }
 }
 
 struct Slide<Content: View>: View {
-    let numberOfSteps: Int
+    let stepAnimations: [Animation]
     let content: (Int) -> Content
+    
+    var numberOfSteps: Int {
+        stepAnimations.count + 1
+    }
     
     @Environment(\.currentStep) private var step
     
     var body: some View {
         content(step)
-            .preference(key: SlideStepsCountKey.self, value: numberOfSteps)
+            .preference(key: SlideStepAnimationKey.self, value: stepAnimations)
+    }
+}
+
+extension Slide {
+    init(numberOfSteps: Int, content: @escaping (Int) -> Content) {
+        self.stepAnimations = [Animation](repeating: .default, count: numberOfSteps-1)
+        self.content = content
     }
 }
 
@@ -132,7 +149,7 @@ struct ImageSlide: View {
     let imageName: String
     
     var body: some View {
-        Slide(numberOfSteps: 2) { step in
+        Slide(stepAnimations: [.bouncy]) { step in
             Image(systemName: imageName)
                 .frame(maxWidth: .infinity, alignment: step == 0 ? .leading : .trailing)
                 .padding(50)
@@ -189,12 +206,23 @@ struct BlueSky: ViewModifier {
 }
 
 struct Slides: View {
+    @Namespace var slides
     
     var body: some View {
         Presentation(theme: BlueSky()) {
             Header {
                 Text("Hello World!")
             }
+            .matchedGeometryEffect(id: "header", in: slides)
+            
+            VStack(spacing: 120) {
+                Header {
+                    Text("Hello World!")
+                }
+                .matchedGeometryEffect(id: "header", in: slides)
+                Text("A tortoise tutorial")
+            }
+
             ImageSlide(imageName: "tortoise")
         }
     }
