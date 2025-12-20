@@ -7,13 +7,29 @@
 
 import SwiftUI
 
-struct SlidesContainer<Content: View, Theme: ViewModifier>: View {
-    var slides: [Content]
+@resultBuilder
+struct SlideBuilder {
+    static func buildExpression<Content: View>(_ expression: Content) -> AnyView {
+        AnyView(expression)
+    }
+    
+    static func buildBlock(_ components: AnyView...) -> [AnyView] {
+        components
+    }
+}
+
+struct SlidesContainer<Theme: ViewModifier>: View {
+    var slides: [AnyView]
     var theme: Theme
     
     @State private var currentSlide = 0
     @State private var currentStep = 0
     @State private var numberOfSteps = 1
+    
+    init(theme: Theme, @SlideBuilder slides: () -> [AnyView]) {
+        self.theme = theme
+        self.slides = slides()
+    }
     
     private func nextSlide() {
         if currentStep < numberOfSteps - 1 {
@@ -23,6 +39,7 @@ struct SlidesContainer<Content: View, Theme: ViewModifier>: View {
         } else if currentSlide < slides.count - 1 {
             currentSlide += 1
             currentStep = 0
+            numberOfSteps = 1
         }
     }
     
@@ -30,6 +47,7 @@ struct SlidesContainer<Content: View, Theme: ViewModifier>: View {
         if currentSlide > 0 {
             currentSlide -= 1
             currentStep = 0
+            numberOfSteps = 1
         }
     }
     
@@ -63,8 +81,9 @@ struct SlidesContainer<Content: View, Theme: ViewModifier>: View {
 }
 
 extension SlidesContainer where Theme == EmptyModifier {
-    init(slides: [Content]) {
-        self.init(slides: slides, theme: .identity)
+    init(@SlideBuilder slides: () -> [AnyView]) {
+        self.theme = .identity
+        self.slides = slides()
     }
 }
 
@@ -116,9 +135,9 @@ struct ImageSlide: View {
 struct Slides: View {
     
     var body: some View {
-        SlidesContainer(slides: [
-            AnyView(Text("Hello World!")),
-            AnyView(ImageSlide(imageName: "tortoise"))
-        ], theme: BlueSky())
+        SlidesContainer(theme: BlueSky()) {
+            Text("Hello World!")
+            ImageSlide(imageName: "tortoise")
+        }
     }
 }

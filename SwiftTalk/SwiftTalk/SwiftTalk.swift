@@ -67,11 +67,6 @@ extension SwiftTalk: View {
                            }
                        }
                    }
-                   .overlay {
-                       if collections.isEmpty {
-                           LoadingIndicator()
-                       }
-                   }
                }
             }
             Tab("Episodes", systemImage: "rectangle.grid.1x2") {
@@ -86,11 +81,6 @@ extension SwiftTalk: View {
                         }
                     }
                     .navigationTitle("Episodes")
-                    .overlay {
-                        if collections.isEmpty {
-                            LoadingIndicator()
-                        }
-                    }
                 }
             }
             Tab("Practices", systemImage: "square.stack.3d.up") {
