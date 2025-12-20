@@ -104,15 +104,6 @@ extension Presentation where Theme == EmptyModifier {
     }
 }
 
-struct BlueSky: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .foregroundStyle(.white)
-            .background(.blue)
-            .font(.custom("Avenir", size: 40))
-    }
-}
-
 extension EnvironmentValues {
     @Entry var currentStep: Int = 0
 }
@@ -149,11 +140,61 @@ struct ImageSlide: View {
     }
 }
 
+struct AnyViewModifier: ViewModifier {
+    let apply: (Content) -> AnyView
+    
+    init<V: View>(transform: @escaping (Content) -> V) {
+        self.apply = { AnyView(transform($0)) }
+    }
+    
+    func body(content: Content) -> AnyView {
+        apply(content)
+    }
+}
+
+extension EnvironmentValues {
+    @Entry var headerStyle = AnyViewModifier(transform: { $0 })
+}
+
+struct Header<Content: View>: View {
+    var content: Content
+    
+    @Environment(\.headerStyle) private var headerStyle
+    
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+    
+    var body: some View {
+        content.modifier(headerStyle)
+    }
+}
+
+extension View {
+    func headerStyle<V: View>(_ transform: @escaping (AnyViewModifier.Content) -> V) -> some View {
+        self.environment(\.headerStyle, AnyViewModifier(transform: transform))
+    }
+}
+
+struct BlueSky: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .foregroundStyle(.white)
+            .background(.blue)
+            .font(.custom("Avenir", size: 40))
+            .headerStyle {
+                $0.padding(40).border(.white, width: 2)
+            }
+    }
+}
+
 struct Slides: View {
     
     var body: some View {
         Presentation(theme: BlueSky()) {
-            Text("Hello World!")
+            Header {
+                Text("Hello World!")
+            }
             ImageSlide(imageName: "tortoise")
         }
     }
