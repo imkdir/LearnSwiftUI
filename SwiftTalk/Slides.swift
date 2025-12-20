@@ -55,30 +55,35 @@ struct Presentation<Theme: ViewModifier>: View {
         }
     }
     
+    var context: SlideContext {
+        .init(
+            currentStep: currentStep,
+            currentSlide: currentSlide,
+            slidesCount: slides.count
+        )
+    }
+    
     var body: some View {
-        ZStack(alignment: .bottom) {
-            SlideContainer(content: slides[currentSlide], theme: theme)
-                .environment(\.currentStep, currentStep)
-                .onPreferenceChange(SlideStepAnimationKey.self) {
-                    self.stepAnimations = $0
-                }
-                .id(currentSlide)
-                .transition(.offset(.zero))
-
-            HStack {
-                Button(action: previousSlide) {
-                    Image(systemName: "arrow.backward")
-                }
-                Spacer()
-                Text("\(currentSlide+1)/\(slides.count)")
-                Spacer()
-                Button(action: nextSlide) {
-                    Image(systemName: "arrow.forward")
-                }
+        SlideContainer(content: slides[currentSlide], theme: theme)
+            .environment(\.slideContext, context)
+            .onPreferenceChange(SlideStepAnimationKey.self) {
+                self.stepAnimations = $0
             }
-            .buttonStyle(.glass)
-            .padding(20)
-        }
+            .id(currentSlide)
+            .transition(.offset(.zero))
+            .overlay(alignment: .bottom) {
+                HStack {
+                    Button(action: previousSlide) {
+                        Image(systemName: "arrow.backward")
+                    }
+                    Spacer()
+                    Button(action: nextSlide) {
+                        Image(systemName: "arrow.forward")
+                    }
+                }
+                .buttonStyle(.glass)
+                .padding(20)
+            }
     }
 }
 
@@ -110,8 +115,22 @@ extension Presentation where Theme == EmptyModifier {
     }
 }
 
+struct SlideContext {
+    var currentStep = 0
+    var currentSlide = 0
+    var slidesCount = 1
+    
+    var progressLabel: String {
+        "\(currentSlide+1)/\(slidesCount)"
+    }
+    
+    var progress: CGFloat {
+        CGFloat(currentSlide+1)/CGFloat(slidesCount)
+    }
+}
+
 extension EnvironmentValues {
-    @Entry var currentStep: Int = 0
+    @Entry var slideContext: SlideContext = .init()
 }
 
 struct SlideStepAnimationKey: PreferenceKey {
@@ -130,7 +149,7 @@ struct Slide<Content: View>: View {
         stepAnimations.count + 1
     }
     
-    @Environment(\.currentStep) private var step
+    @Environment(\.slideContext.currentStep) private var step
     
     var body: some View {
         content(step)
@@ -193,9 +212,37 @@ extension View {
     }
 }
 
+struct Progress: Shape {
+    var progress: CGFloat
+    
+    var animatableData: CGFloat {
+        get { progress }
+        set { progress = newValue }
+    }
+    
+    func path(in rect: CGRect) -> Path {
+        Path { p in
+            p.addRect(rect.divided(
+                atDistance: rect.width * progress,
+                from: .minXEdge
+            ).slice)
+        }
+    }
+}
+
 struct BlueSky: ViewModifier {
+    @Environment(\.slideContext) var context
+    
     func body(content: Content) -> some View {
         content
+            .overlay(alignment: .bottom) {
+                VStack {
+                    Text("\(context.currentSlide+1)/\(context.slidesCount)")
+                    Progress(progress: context.progress)
+                        .fill(.white)
+                        .frame(height: 10)
+                }
+            }
             .foregroundStyle(.white)
             .background(.blue)
             .font(.custom("Avenir", size: 40))
