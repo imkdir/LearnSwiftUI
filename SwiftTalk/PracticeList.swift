@@ -15,6 +15,7 @@ enum Practice: String, Identifiable, CaseIterable {
     case animationCurves
     case shoppingCart
     case stopwatchPage
+    case map
     
     var id: Self {
         self
@@ -36,6 +37,8 @@ enum Practice: String, Identifiable, CaseIterable {
             "Shopping Cart"
         case .stopwatchPage:
             "Stopwatch Page"
+        case .map:
+            "Map"
         }
     }
 }
@@ -64,6 +67,8 @@ struct PracticeList: View {
                     ShoppingCart()
                 case .stopwatchPage:
                     StopwatchPage()
+                case .map:
+                    MapView()
                 }
             }
         }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		034CEA072EF2F3FE009B222E /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034CEA062EF2F3FA009B222E /* MapView.swift */; };
 		038BE8502EEA986300CC3968 /* TinyNetworking in Frameworks */ = {isa = PBXBuildFile; productRef = 038BE84F2EEA986300CC3968 /* TinyNetworking */; };
 		038BE8552EEAA7D400CC3968 /* Model in Frameworks */ = {isa = PBXBuildFile; productRef = 038BE8542EEAA7D400CC3968 /* Model */; };
 		038BE8572EEAA7D400CC3968 /* ViewHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 038BE8562EEAA7D400CC3968 /* ViewHelpers */; };
@@ -34,6 +35,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		034CEA062EF2F3FA009B222E /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 		038BE8342EEA83FE00CC3968 /* SwiftTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		038BE85C2EEBB32A00CC3968 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		038BE85D2EEBB32A00CC3968 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@
 				038BE8872EEFA17C00CC3968 /* AnimationCurves.swift */,
 				038BE8892EEFCF5F00CC3968 /* ShoppingCart.swift */,
 				038BE88B2EF12ED100CC3968 /* Stopwatch.swift */,
+				034CEA062EF2F3FA009B222E /* MapView.swift */,
 				038BE8832EEE8E0300CC3968 /* PracticeList.swift */,
 				038BE86D2EEBD39400CC3968 /* SwiftTalk */,
 			);
@@ -223,6 +226,7 @@
 				038BE8842EEE8E0300CC3968 /* PracticeList.swift in Sources */,
 				038BE8802EEE3BC700CC3968 /* TravlerEffect.swift in Sources */,
 				038BE8682EEBB32A00CC3968 /* Resource.swift in Sources */,
+				034CEA072EF2F3FE009B222E /* MapView.swift in Sources */,
 				038BE8692EEBB32A00CC3968 /* SwiftTalk.swift in Sources */,
 				038BE86A2EEBB32A00CC3968 /* SwiftTalkApp.swift in Sources */,
 			);
@@ -361,6 +365,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SwiftTalk/Info.plist;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "SwiftTalk needs access to location to put markers on your map.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -409,6 +414,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SwiftTalk/Info.plist;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "SwiftTalk needs access to location to put markers on your map.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
