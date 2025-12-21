@@ -7,219 +7,100 @@
 
 import SwiftUI
 
-struct SwiftUICollectionViewSizeKey<ID: Hashable>: PreferenceKey {
-    static var defaultValue: [ID: CGSize] { [:] }
-    static func reduce(value: inout [ID: CGSize], nextValue: () -> [ID: CGSize]) {
-        value.merge(nextValue(), uniquingKeysWith: { $1 })
+struct FlowLayoutSizePreferenceKey: PreferenceKey {
+    static var defaultValue: [CGSize] = []
+    
+    static func reduce(value: inout [CGSize], nextValue: () -> [CGSize]) {
+        value += nextValue()
     }
 }
 
-struct PropagateSize<V: View, ID: Hashable>: View {
-    let content: V
-    let id: ID
-    
-    var body: some View {
-        content
-            .background {
-                GeometryReader { proxy in
-                    Color.clear
-                        .preference(
-                            key: SwiftUICollectionViewSizeKey.self,
-                            value: [id: proxy.size]
-                        )
-                }
-            }
+func layout(sizes: [CGSize], spacing: CGSize = .init(width: 10, height: 10)) -> [CGPoint] {
+    var currentPoint: CGPoint = .zero
+    var result: [CGPoint] = []
+    for size in sizes {
+        result.append(currentPoint)
+        currentPoint.x += size.width + spacing.width
     }
+    return result
 }
 
-struct FLowLayout {
-    let spacing: UIOffset
-    let containerSize: CGSize
+func layout(sizes: [CGSize], spacing: CGSize = .init(width: 10, height: 10), containerWidth: CGFloat) -> [CGPoint] {
+    var currentPoint: CGPoint = .zero
+    var result: [CGPoint] = []
+    var lineHeight: CGFloat = 0
     
-    init(containerSize: CGSize, spacing: UIOffset = .init(horizontal: 10, vertical: 10)) {
-        self.containerSize = containerSize
-        self.spacing = spacing
-    }
-    
-    var currentX = CGFloat(0)
-    var currentY = CGFloat(0)
-    var lineHeight = CGFloat(0)
-    
-    mutating func add(element size: CGSize) -> CGRect {
-        if currentX + size.width > containerSize.width {
-            currentX = 0
-            currentY += lineHeight + spacing.vertical
+    for size in sizes {
+        if currentPoint.x + size.width > containerWidth {
+            currentPoint.x = 0
+            currentPoint.y += lineHeight + spacing.height
             lineHeight = 0
         }
-        defer {
-            lineHeight = max(lineHeight, size.height)
-            currentX += size.width + spacing.horizontal
-        }
-        return CGRect(origin: .init(x: currentX, y: currentY), size: size)
+        result.append(currentPoint)
+        currentPoint.x += size.width + spacing.width
+        lineHeight = max(lineHeight, size.height)
     }
-    
-    var size: CGSize {
-        .init(width: containerSize.width, height: currentY + lineHeight)
-    }
+    return result
 }
 
-struct DragState<ID: Hashable> {
-    let id: ID
-    var translation: CGSize
-    var location: CGPoint
-}
-
-struct CollectionLayoutView<Collection: RandomAccessCollection, Content: View>: View where Collection.Element: Identifiable {
-    typealias Element = Collection.Element
-    typealias ID = Element.ID
-    typealias Layout = (Collection, CGSize, [ID: CGSize]) -> [ID: CGSize]
+struct FlowLayout<Element: Identifiable, Cell: View>: View {
+    var items: [Element]
+    var cell: (Element) -> Cell
     
-    let data: Collection
-    let content: (Element) -> Content
-    let layout: Layout
-    let didMove: (Collection.Index, Collection.Index) -> Void
+    /* Note:
+     In the previous version of this project, we also stored the IDs of items along with their sizes. It's undocumented, but the aggregated sizes seem to always be in the same order as the cells, so we can look up each cell's size by its index, and we don't need its ID.
+     */
+    @State private var sizes: [CGSize] = []
     
-    @State private var sizes: [ID: CGSize] = [:]
-    @State private var containerSize: CGSize = .zero
-    @State private var dragState: DragState<ID>?
-    
-    var offsets: [ID: CGSize] {
-        layout(data, containerSize, sizes)
-    }
-    
-    func offset(of element: Element) -> CGSize {
-        var offset = offsets[element.id, default: .zero]
-        if let dragState, dragState.id == element.id {
-            offset += dragState.translation
-        }
-        return offset
-    }
-    
-    var insertion: (key: ID, value: CGSize)? {
-        guard let location = dragState?.location else {
-            return nil
-        }
-        return offsets
-            .sorted(by: {
-                let (lhs, rhs) = ($0.value, $1.value)
-                return lhs.height > rhs.height
-                    || lhs.height == rhs.height && lhs.width > rhs.width
-            })
-            .first(where: { (_, value) in
-                value.width < location.x && value.height < location.y
-            })
-    }
-    
-    func cursor(at insertion: (key: ID, value: CGSize)) -> some View {
-        Rectangle()
-            .fill(Color.white)
-            .frame(width: 4, height: sizes[insertion.key]?.height)
-            .offset(insertion.value)
-            .offset(x: -7)
-    }
+    @State private var containerWidth: CGFloat = 0
     
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            ForEach(data) { datum in
-                PropagateSize(content: content(datum), id: datum.id)
-                    .offset(offset(of: datum))
-                    .animation(.default, value: offsets)
-                    .gesture(DragGesture().onChanged({ value in
-                        dragState = .init(
-                            id: datum.id,
-                            translation: value.translation,
-                            location: value.location
-                        )
-                    }).onEnded({ _ in
-                        guard let dragState else { return }
-                        
-                        if let insertion,
-                           let oldIdx = data.firstIndex(where: { $0.id == dragState.id }),
-                           let newIdx = data.firstIndex(where: { $0.id == insertion.key }) {
-                            self.dragState = nil
-                            didMove(oldIdx, newIdx)
-                        } else {
-                            withAnimation(.bouncy) {
-                                self.dragState = nil
+        let laidout = layout(sizes: sizes, containerWidth: containerWidth)
+        
+        VStack(spacing: 0) {
+            GeometryReader { proxy in
+                Color.clear.preference(key: FlowLayoutSizePreferenceKey.self, value: [proxy.size])
+            }
+            .onPreferenceChange(FlowLayoutSizePreferenceKey.self) {
+                self.containerWidth = $0[0].width
+            }
+            .frame(height: 0)
+            ZStack(alignment: .topLeading) {
+                ForEach(Array(zip(items, items.indices)), id: \.0.id) { (item, index) in
+                    cell(item)
+                        .fixedSize()
+                        .background {
+                            GeometryReader { proxy in
+                                Color.clear.preference(key: FlowLayoutSizePreferenceKey.self, value: [proxy.size])
                             }
                         }
-                    }))
-                if let insertion {
-                    cursor(at: insertion)
-                }
-            }
-            Color.clear
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }.onPreferenceChange(SwiftUICollectionViewSizeKey<ID>.self) {
-            sizes = $0
-        }
-        .padding()
-        .border(Color.red)
-        .onGeometryChange(for: CGSize.self) { proxy in
-            proxy.size
-        } action: { newValue in
-            containerSize = newValue
-        }
-    }
-}
-
-struct FlowLayoutPlayground: View {
-    
-    @State private var dividerWidth: CGFloat = 0
-    @State private var contentWidth: CGFloat = 60
-    @State private var items = poorRichardQuotes
-    
-    var body: some View {
-        VStack {
-            HStack(spacing: 0) {
-                Color(uiColor: .tertiarySystemBackground)
-                    .frame(width: dividerWidth)
-                ScrollView {
-                    CollectionLayoutView(data: items) {
-                        $0
-                    } layout: { elements, containerSize, sizes in
-                        var state = FLowLayout(containerSize: containerSize)
-                        var result: [Bubble.ID: CGSize] = [:]
-                        for element in elements {
-                            let rect = state.add(element: sizes[element.id, default: .zero])
-                            result[element.id] = .init(width: rect.origin.x, height: rect.origin.y)
+                    /*
+                     Before, we rendered each item at a calculated offset. But by using alignment guides instead of offsets, we let the layout system place the items, allowing the ZStack to automatically grow with its contents
+                     */
+                        .alignmentGuide(.leading) { dimension in
+                            guard !laidout.isEmpty else { return 0 }
+                            return -laidout[index].x
                         }
-                        return result
-                    } didMove: { oldIdx, newIdx in
-                        items.move(fromOffsets: .init(integer: oldIdx), toOffset: newIdx)
-                    }
+                        .alignmentGuide(.top) { dimension in
+                            guard !laidout.isEmpty else { return 0 }
+                            return -laidout[index].y
+                        }
                 }
-                .padding(2)
-                .border(Color.secondary)
             }
-            Slider(value: $dividerWidth, in: 0...contentWidth-60)
-                .padding(60)
-        }.onGeometryChange(for: CGFloat.self) { proxy in
-            proxy.size.width
-        } action: { newValue in
-            self.contentWidth = max(60, newValue)
+            .onPreferenceChange(FlowLayoutSizePreferenceKey.self) { value in
+                self.sizes = value
+            }
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
         }
     }
 }
 
-struct Bubble: Identifiable, View {
+struct Item: Identifiable, Hashable {
     let id = UUID()
-    
     let value: String
-    
-    var body: some View {
-        Text(value)
-            .foregroundStyle(.white)
-            .padding(.horizontal, 4)
-            .padding(.vertical, 2)
-            .background {
-                RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(Color.blue)
-            }
-    }
 }
 
-private let poorRichardQuotes: [Bubble] = [
+private let quotes = [
     "Three may keep a secret, if two of them are dead.",
     "Early to bed and early to rise, makes a man healthy, wealthy and wise.",
     "Fish and visitors stink in three days.",
@@ -230,22 +111,48 @@ private let poorRichardQuotes: [Bubble] = [
     "There are no gains without pains.",
     "Well done is better than well said.",
     "Haste makes waste."
-].flatMap({ $0.components(separatedBy: " ") }).map(Bubble.init(value:))
+]
 
-extension Color {
-    static func fromString(_ value: String) -> Color {
-        let hash = value.hashValue
-        let hue = Double(abs(hash) % 1000) / 1000.0
-        return Color(hue: hue, saturation: 0.6, brightness: 0.8)
+struct FlowLayoutPlayground: View {
+    let items: [Item] = quotes
+        .flatMap({ $0.components(separatedBy: " ")})
+        .map(Item.init(value:))
+    
+    @State var spacing: CGFloat = 0
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            HStack(spacing: 0) {
+                Spacer()
+                    .frame(width: spacing)
+                    .overlay(alignment: .trailing) {
+                        Image(systemName: "arrow.forward")
+                            .font(.largeTitle)
+                            .bold()
+                            .opacity((spacing-20)/50.0)
+                    }
+                ScrollView {
+                    FlowLayout(items: items) { item in
+                        Text(item.value)
+                            .foregroundStyle(.white)
+                            .padding(6)
+                            .background(RoundedRectangle(cornerRadius: 5).fill(.blue))
+                    }
+                    .border(.secondary)
+                }.frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            
+            Text("Adjust Spacing to Trigger Layout")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            
+            Slider(value: $spacing, in: 0...200)
+                .padding(.horizontal, 60)
+        }
+        .padding()
     }
 }
 
-extension CGSize {
-    static func + (lhs: CGSize, rhs: CGSize) -> CGSize {
-        CGSize(width: lhs.width + rhs.width, height: lhs.height + rhs.height)
-    }
-    
-    static func += (lhs: inout CGSize, rhs: CGSize) {
-        lhs = lhs + rhs
-    }
+#Preview {
+    FlowLayoutPlayground()
 }
