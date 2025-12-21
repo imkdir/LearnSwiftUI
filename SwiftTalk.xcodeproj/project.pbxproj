@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		034CEA072EF2F3FE009B222E /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034CEA062EF2F3FA009B222E /* MapView.swift */; };
 		034CEA092EF63ED0009B222E /* Slides.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034CEA082EF63E8C009B222E /* Slides.swift */; };
+		034CEA0B2EF79AA6009B222E /* Checkmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034CEA0A2EF79A9D009B222E /* Checkmark.swift */; };
 		038BE8502EEA986300CC3968 /* TinyNetworking in Frameworks */ = {isa = PBXBuildFile; productRef = 038BE84F2EEA986300CC3968 /* TinyNetworking */; };
 		038BE8552EEAA7D400CC3968 /* Model in Frameworks */ = {isa = PBXBuildFile; productRef = 038BE8542EEAA7D400CC3968 /* Model */; };
 		038BE8572EEAA7D400CC3968 /* ViewHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 038BE8562EEAA7D400CC3968 /* ViewHelpers */; };
@@ -38,6 +39,7 @@
 /* Begin PBXFileReference section */
 		034CEA062EF2F3FA009B222E /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 		034CEA082EF63E8C009B222E /* Slides.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Slides.swift; sourceTree = "<group>"; };
+		034CEA0A2EF79A9D009B222E /* Checkmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Checkmark.swift; sourceTree = "<group>"; };
 		038BE8342EEA83FE00CC3968 /* SwiftTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		038BE85C2EEBB32A00CC3968 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		038BE85D2EEBB32A00CC3968 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -111,6 +113,7 @@
 				038BE88B2EF12ED100CC3968 /* Stopwatch.swift */,
 				034CEA062EF2F3FA009B222E /* MapView.swift */,
 				034CEA082EF63E8C009B222E /* Slides.swift */,
+				034CEA0A2EF79A9D009B222E /* Checkmark.swift */,
 				038BE8832EEE8E0300CC3968 /* PracticeList.swift */,
 				038BE86D2EEBD39400CC3968 /* SwiftTalk */,
 			);
@@ -215,6 +218,7 @@
 				038BE87E2EED950400CC3968 /* LoadingIndicator.swift in Sources */,
 				038BE8862EEF8D0900CC3968 /* ShakeIt.swift in Sources */,
 				038BE88C2EF12ED900CC3968 /* Stopwatch.swift in Sources */,
+				034CEA0B2EF79AA6009B222E /* Checkmark.swift in Sources */,
 				038BE8752EEBD97500CC3968 /* CollectionItem.swift in Sources */,
 				034CEA092EF63ED0009B222E /* Slides.swift in Sources */,
 				038BE8712EEBD42400CC3968 /* CollectionDetail.swift in Sources */,
