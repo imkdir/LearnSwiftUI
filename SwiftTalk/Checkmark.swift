@@ -62,7 +62,10 @@ struct CheckmarkV2: View {
                 Checkmark()
                     .trim(from: 0, to: enabled ? 1 : 0)
                     .stroke(lineWidth: 2)
-                    .animation(.linear(duration: duration/2).delay(duration/2), value: enabled)
+                    .animation(
+                        .linear(duration: duration/2).delay(duration/2),
+                        value: enabled
+                    )
                     .foregroundStyle(.white)
                     .padding(5)
             }
@@ -87,9 +90,15 @@ struct CheckmarkPreviews: View {
                 .overlay(alignment: .topTrailing) {
                     if selectedVersion == "V1" {
                         CheckmarkV1(enabled: enabled)
-                            .animation(.linear(duration: duration), value: enabled)
+                            .animation(
+                                .linear(duration: duration),
+                                value: enabled
+                            )
                     } else {
-                        CheckmarkV2(enabled: enabled, duration: duration)
+                        CheckmarkV2(
+                            enabled: enabled,
+                            duration: duration
+                        )
                     }
                 }
                 .scaleEffect(2)
@@ -109,10 +118,10 @@ struct CheckmarkPreviews: View {
                 in: 0.2...2.0,
                 label: { Text("Duration") },
                 minimumValueLabel: {
-                    Image(systemName: "tortoise")
+                    Image(systemName: "hare")
                 },
                 maximumValueLabel: {
-                    Image(systemName: "hare")
+                    Image(systemName: "tortoise")
                 }
             )
         }
