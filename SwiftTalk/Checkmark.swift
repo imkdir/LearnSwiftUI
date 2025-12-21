@@ -11,12 +11,18 @@ struct Checkmark: Shape {
     
     func path(in rect: CGRect) -> Path {
         Path { p in
-            p.move(to: .init(x: rect.minX, y: rect.midY))
+            p.move(to: .init(x: rect.minX, y: rect.midY + rect.height/5))
             p.addLine(to: .init(x: rect.minX + rect.width/3, y: rect.maxY))
             p.addLine(to: .init(x: rect.maxX, y: rect.minY))
         }
     }
 }
+
+let strokeStyle = StrokeStyle(
+    lineWidth: 2,
+    lineCap: .round,
+    lineJoin: .round
+)
 
 struct CheckmarkV1: View, Animatable {
     
@@ -41,12 +47,11 @@ struct CheckmarkV1: View, Animatable {
             .overlay {
                 Checkmark()
                     .trim(from: 0, to: shapeProgress)
-                    .stroke(lineWidth: 2)
+                    .stroke(style: strokeStyle)
                     .foregroundStyle(.white)
                     .padding(5)
             }
             .scaleEffect(scaleProgress)
-            .offset(x: 8, y: -8)
     }
 }
 
@@ -61,7 +66,7 @@ struct CheckmarkV2: View {
             .overlay {
                 Checkmark()
                     .trim(from: 0, to: enabled ? 1 : 0)
-                    .stroke(lineWidth: 2)
+                    .stroke(style: strokeStyle)
                     .animation(
                         .linear(duration: duration/2).delay(duration/2),
                         value: enabled
@@ -94,11 +99,13 @@ struct CheckmarkPreviews: View {
                                 .linear(duration: duration),
                                 value: enabled
                             )
+                            .offset(x: 4, y: -4)
                     } else {
                         CheckmarkV2(
                             enabled: enabled,
                             duration: duration
                         )
+                        .offset(x: 4, y: -4)
                     }
                 }
                 .scaleEffect(2)
