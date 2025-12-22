@@ -19,6 +19,7 @@ enum Practice: String, Identifiable, CaseIterable {
     case slides
     case checkmarks
     case scalable
+    case magnification
     
     var id: Self {
         self
@@ -48,6 +49,8 @@ enum Practice: String, Identifiable, CaseIterable {
             "Checkmarks"
         case .scalable:
             "Scalable"
+        case .magnification:
+            "Magnification"
         }
     }
 }
@@ -84,6 +87,8 @@ struct PracticeList: View {
                     CheckmarkPreviews()
                 case .scalable:
                     ScalablePlayground()
+                case .magnification:
+                    MagnificationPlayground()
                 }
             }
         }
