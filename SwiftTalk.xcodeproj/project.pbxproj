@@ -37,6 +37,7 @@
 		038BE8882EEFA18100CC3968 /* AnimationCurves.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8872EEFA17C00CC3968 /* AnimationCurves.swift */; };
 		038BE88A2EEFCF6B00CC3968 /* ShoppingCart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8892EEFCF5F00CC3968 /* ShoppingCart.swift */; };
 		038BE88C2EF12ED900CC3968 /* Stopwatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE88B2EF12ED100CC3968 /* Stopwatch.swift */; };
+		82838B4C2EFA7E9C0042D94F /* MatchedGeometryEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4B2EFA7E930042D94F /* MatchedGeometryEffect.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,6 +69,7 @@
 		038BE8872EEFA17C00CC3968 /* AnimationCurves.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimationCurves.swift; sourceTree = "<group>"; };
 		038BE8892EEFCF5F00CC3968 /* ShoppingCart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingCart.swift; sourceTree = "<group>"; };
 		038BE88B2EF12ED100CC3968 /* Stopwatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stopwatch.swift; sourceTree = "<group>"; };
+		82838B4B2EFA7E930042D94F /* MatchedGeometryEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchedGeometryEffect.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,6 +125,7 @@
 				034CEA0C2EF7C7CA009B222E /* LabeledBar.swift */,
 				034CEA0E2EF7D0C3009B222E /* ButtonStack.swift */,
 				034CEA102EF8B650009B222E /* Magnification.swift */,
+				82838B4B2EFA7E930042D94F /* MatchedGeometryEffect.swift */,
 				038BE8832EEE8E0300CC3968 /* PracticeList.swift */,
 				038BE86D2EEBD39400CC3968 /* SwiftTalk */,
 			);
@@ -225,6 +228,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				038BE87E2EED950400CC3968 /* LoadingIndicator.swift in Sources */,
+				82838B4C2EFA7E9C0042D94F /* MatchedGeometryEffect.swift in Sources */,
 				038BE8862EEF8D0900CC3968 /* ShakeIt.swift in Sources */,
 				038BE88C2EF12ED900CC3968 /* Stopwatch.swift in Sources */,
 				034CEA0B2EF79AA6009B222E /* Checkmark.swift in Sources */,

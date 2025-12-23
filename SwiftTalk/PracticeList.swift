@@ -20,6 +20,7 @@ enum Practice: String, Identifiable, CaseIterable {
     case checkmarks
     case scalable
     case magnification
+    case matchedGeometryEffect
     
     var id: Self {
         self
@@ -51,6 +52,8 @@ enum Practice: String, Identifiable, CaseIterable {
             "Scalable"
         case .magnification:
             "Magnification"
+        case .matchedGeometryEffect:
+            "Matched Geometry Effect"
         }
     }
 }
@@ -89,6 +92,8 @@ struct PracticeList: View {
                     ScalablePlayground()
                 case .magnification:
                     MagnificationPlayground()
+                case .matchedGeometryEffect:
+                    MatchedGeometryEffectDemo()
                 }
             }
         }
