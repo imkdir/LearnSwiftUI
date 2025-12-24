@@ -19,12 +19,15 @@ struct SwiftTalk {
     @ObservedObject private var session = Session.shared
     @State private var showLogOutAlert = false
     
+    @Environment(\.allEpisodes) private var allEpisodes
+    @Environment(\.allCollections) private var allCollections
+
     var collections: [CollectionView] {
-        Store.shared.allCollections.value ?? []
+        allCollections.value ?? []
     }
     
     var episodes: [EpisodeView] {
-        Store.shared.allEpisodes.value ?? []
+        allEpisodes.value ?? []
     }
 }
 
@@ -35,14 +38,18 @@ extension SwiftTalk: View {
                 NavigationStack {
                    List {
                        ForEach(collections) { item in
-                           NavigationLink(destination: {
-                               CollectionDetail(collection: item)
-                           }) {
+                           NavigationLink(value: item) {
                                CollectionItem(collection: item)
                            }
                        }
                    }
                    .navigationTitle("Collections")
+                   .navigationDestination(for: CollectionView.self) { collection in
+                       CollectionDetail(collection: collection)
+                   }
+                   .navigationDestination(for: EpisodeView.self) { episode in
+                       EpisodeDetail(episode: episode)
+                   }
                    .toolbar {
                        ToolbarItem(placement: .primaryAction) {
                            if session.credentials == nil {
@@ -73,14 +80,15 @@ extension SwiftTalk: View {
                 NavigationStack {
                     List {
                         ForEach(episodes) { item in
-                            NavigationLink(destination: {
-                                EpisodeDetail(episode: item, displayInCollection: true)
-                            }) {
+                            NavigationLink(value: item) {
                                 EpisodeItem(episode: item)
                             }
                         }
                     }
                     .navigationTitle("Episodes")
+                    .navigationDestination(for: EpisodeView.self) { episode in
+                        EpisodeDetail(episode: episode, displayInCollection: true)
+                    }
                 }
             }
             Tab("Practices", systemImage: "square.stack.3d.up") {
@@ -90,8 +98,18 @@ extension SwiftTalk: View {
     }
 }
 
-extension CollectionView: @retroactive Identifiable {}
-extension EpisodeView: @retroactive Identifiable {}
+extension CollectionView: @retroactive Hashable, @retroactive Identifiable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
+
+extension EpisodeView: @retroactive Hashable, @retroactive Identifiable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
+
 
 
 #Preview {

@@ -38,6 +38,7 @@
 		038BE88A2EEFCF6B00CC3968 /* ShoppingCart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8892EEFCF5F00CC3968 /* ShoppingCart.swift */; };
 		038BE88C2EF12ED900CC3968 /* Stopwatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE88B2EF12ED100CC3968 /* Stopwatch.swift */; };
 		82838B4C2EFA7E9C0042D94F /* MatchedGeometryEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4B2EFA7E930042D94F /* MatchedGeometryEffect.swift */; };
+		82838B4E2EFB52E80042D94F /* FinishedEpisodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4D2EFB52E80042D94F /* FinishedEpisodes.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -70,6 +71,7 @@
 		038BE8892EEFCF5F00CC3968 /* ShoppingCart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingCart.swift; sourceTree = "<group>"; };
 		038BE88B2EF12ED100CC3968 /* Stopwatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stopwatch.swift; sourceTree = "<group>"; };
 		82838B4B2EFA7E930042D94F /* MatchedGeometryEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchedGeometryEffect.swift; sourceTree = "<group>"; };
+		82838B4D2EFB52E80042D94F /* FinishedEpisodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinishedEpisodes.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,6 +144,7 @@
 				038BE8762EEBDA1400CC3968 /* EpisodeDetail.swift */,
 				038BE8782EEC141800CC3968 /* Session.swift */,
 				038BE86E2EEBD3BF00CC3968 /* Store.swift */,
+				82838B4D2EFB52E80042D94F /* FinishedEpisodes.swift */,
 			);
 			path = SwiftTalk;
 			sourceTree = "<group>";
@@ -247,6 +250,7 @@
 				038BE8672EEBB32A00CC3968 /* CurrencyConverter.swift in Sources */,
 				038BE8732EEBD45E00CC3968 /* EpisodeItem.swift in Sources */,
 				038BE8772EEBDA1900CC3968 /* EpisodeDetail.swift in Sources */,
+				82838B4E2EFB52E80042D94F /* FinishedEpisodes.swift in Sources */,
 				038BE8842EEE8E0300CC3968 /* PracticeList.swift in Sources */,
 				038BE8802EEE3BC700CC3968 /* TravlerEffect.swift in Sources */,
 				038BE8682EEBB32A00CC3968 /* Resource.swift in Sources */,

@@ -40,6 +40,7 @@ class Store {
         cachedEpisodeDetails[episodeView.id] = result
         return result
     }
+    
 }
 
 extension CollectionView: @retroactive Equatable {
@@ -47,7 +48,12 @@ extension CollectionView: @retroactive Equatable {
         lhs.id == rhs.id
     }
 }
-extension EpisodeView: @retroactive Equatable {}
+
+extension EpisodeView: @retroactive Equatable {
+    public static func == (lhs: EpisodeView, rhs: EpisodeView) -> Bool {
+        lhs.id == rhs.id
+    }
+}
 
 extension EpisodeDetails: @retroactive Equatable {
     public static func == (lhs: Model.EpisodeDetails, rhs: Model.EpisodeDetails) -> Bool {

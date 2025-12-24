@@ -99,7 +99,8 @@ struct EpisodeDetail: View {
     let episode: EpisodeView
     let displayInCollection: Bool
     
-    private let playerState = PlayerState()
+    @State private var playerState = PlayerState()
+    private let finishedEpisodes = FinishedEpisodes.shared
     
     @Environment(\.isPresented) private var isPresented
     @Environment(\.allCollections) private var allCollections
@@ -156,44 +157,51 @@ struct EpisodeDetail: View {
     }
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading) {
-                    Text(episode.title)
-                        .font(.largeTitle)
-                        .bold()
-                        .lineLimit(nil)
-                    Text(episode.caption)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Text(episode.synopsis)
-                        .lineLimit(nil)
-                        .padding(.vertical, 8)
-                    Group {
-                        if let player = playerState.player {
-                            VideoPlayer(player: player) {
-                                playerState.started ? nil : overlay
-                            }
-                        } else {
-                            overlay
+        ScrollView {
+            VStack(alignment: .leading) {
+                Text(episode.title)
+                    .font(.largeTitle)
+                    .bold()
+                    .lineLimit(nil)
+                Text(episode.caption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(episode.synopsis)
+                    .lineLimit(nil)
+                    .padding(.vertical, 8)
+                Group {
+                    if let player = playerState.player {
+                        VideoPlayer(player: player) {
+                            playerState.started ? nil : overlay
                         }
-                    }.aspectRatio(16/9, contentMode: .fit)
-                    collection.map({ item in
-                        NavigationLink(destination: {
-                            CollectionDetail(collection: item)
-                        }, label: {
-                            CollectionCard(collection: item)
-                        }).buttonStyle(.plain)
-                    })
+                    } else {
+                        overlay
+                    }
+                }.aspectRatio(16/9, contentMode: .fit)
+                collection.map({ item in
+                    NavigationLink(destination: {
+                        CollectionDetail(collection: item)
+                    }, label: {
+                        CollectionCard(collection: item)
+                    }).buttonStyle(.plain)
+                })
+            }
+            .padding()
+            .toolbar {
+                ToolbarItem {
+                    Button {
+                        finishedEpisodes.toggle(episode)
+                    } label: {
+                        Image(systemName: finishedEpisodes.isFinished(episode) ? "checkmark.circle.fill" : "checkmark.circle")
+                    }
                 }
-                .padding()
             }
-            .onAppear {
-                playerState.connect(episode: episode)
-            }
-            .onDisappear {
-                playerState.disconnect(presented: isPresented)
-            }
+        }
+        .onAppear {
+            playerState.connect(episode: episode)
+        }
+        .onDisappear {
+            playerState.disconnect(presented: isPresented)
         }
     }
 }

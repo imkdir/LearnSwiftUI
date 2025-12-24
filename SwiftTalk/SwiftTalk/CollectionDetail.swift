@@ -25,57 +25,46 @@ struct CollectionDetail: View {
     }
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Text(collection.title)
-                        .bold()
-                        .font(.largeTitle)
-                        .lineLimit(2)
-                        .padding()
-                        .background(Color(uiColor: .systemBackground.withAlphaComponent(0.8)))
-                        .border(.secondary)
-                    Text(collection.description)
-                        .lineLimit(nil)
-                    LazyVStack(alignment: .leading, spacing: 16) {
-                        ForEach(episodes.sorted()) { item in
-                            NavigationLink(destination: {
-                                EpisodeDetail(episode: item)
-                            }) {
-                                EpisodeItem(
-                                    episode: item,
-                                    style: .value2(showDivider: !isLastEpisode(item))
-                                )
-                            }.buttonStyle(.plain)
-                        }
-                    }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                Text(collection.title)
+                    .bold()
+                    .font(.largeTitle)
+                    .lineLimit(2)
                     .padding()
-                    .background(Color(uiColor: .systemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    .opacity(episodes.isEmpty ? 0 : 1)
-                    .animation(.easeInOut, value: episodes.isEmpty)
+                    .background(Color(uiColor: .systemBackground.withAlphaComponent(0.8)))
+                    .border(.secondary)
+                Text(collection.description)
+                    .lineLimit(nil)
+                LazyVStack(alignment: .leading, spacing: 16) {
+                    ForEach(episodes.sorted()) { item in
+                        NavigationLink(value: item) {
+                            EpisodeItem(
+                                episode: item,
+                                style: .value2(showDivider: !isLastEpisode(item))
+                            )
+                        }.buttonStyle(.plain)
+                    }
                 }
-                .padding(.horizontal)
+                .padding()
+                .background(Color(uiColor: .systemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .opacity(episodes.isEmpty ? 0 : 1)
+                .animation(.easeInOut, value: episodes.isEmpty)
             }
-            .background(alignment: .top) {
-                AsyncImage(url: collection.artwork.png) {
-                    $0.resizable().scaledToFit().ignoresSafeArea()
-                } placeholder: {
-                    Color.clear
-                }
+            .padding(.horizontal)
+        }
+        .background(alignment: .top) {
+            AsyncImage(url: collection.artwork.png) {
+                $0.resizable().scaledToFit().ignoresSafeArea()
+            } placeholder: {
+                Color.clear
             }
         }
     }
 }
 
-
-
 extension EpisodeView: @retroactive Comparable {
-    public static func == (lhs: EpisodeView, rhs: EpisodeView) -> Bool {
-        lhs.collection == rhs.collection
-        && lhs.number == rhs.number
-    }
-    
     public static func < (lhs: Model.EpisodeView, rhs: Model.EpisodeView) -> Bool {
         lhs.number < rhs.number
     }
