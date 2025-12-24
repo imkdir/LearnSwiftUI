@@ -18,6 +18,7 @@ extension EnvironmentValues {
 struct SwiftTalk {
     @ObservedObject private var session = Session.shared
     @State private var showLogOutAlert = false
+    @State private var searchText = ""
     
     @Environment(\.allEpisodes) private var allEpisodes
     @Environment(\.allCollections) private var allCollections
@@ -28,6 +29,17 @@ struct SwiftTalk {
     
     var episodes: [EpisodeView] {
         allEpisodes.value ?? []
+    }
+    
+    var filteredEpisodes: [EpisodeView] {
+        if searchText.isEmpty {
+            return episodes
+        } else {
+            return episodes.filter {
+                $0.title.localizedCaseInsensitiveContains(searchText) ||
+                $0.synopsis.localizedCaseInsensitiveContains(searchText)
+            }
+        }
     }
 }
 
@@ -79,13 +91,14 @@ extension SwiftTalk: View {
             Tab("Episodes", systemImage: "rectangle.grid.1x2") {
                 NavigationStack {
                     List {
-                        ForEach(episodes) { item in
+                        ForEach(filteredEpisodes) { item in
                             NavigationLink(value: item) {
                                 EpisodeItem(episode: item)
                             }
                         }
                     }
                     .navigationTitle("Episodes")
+                    .searchable(text: $searchText, prompt: "Search Episodes")
                     .navigationDestination(for: EpisodeView.self) { episode in
                         EpisodeDetail(episode: episode, displayInCollection: true)
                     }
