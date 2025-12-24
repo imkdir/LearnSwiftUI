@@ -39,6 +39,7 @@
 		038BE88C2EF12ED900CC3968 /* Stopwatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE88B2EF12ED100CC3968 /* Stopwatch.swift */; };
 		82838B4C2EFA7E9C0042D94F /* MatchedGeometryEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4B2EFA7E930042D94F /* MatchedGeometryEffect.swift */; };
 		82838B4E2EFB52E80042D94F /* FinishedEpisodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4D2EFB52E80042D94F /* FinishedEpisodes.swift */; };
+		82838B502EFBC82F0042D94F /* LargeScrollingGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4F2EFBC8280042D94F /* LargeScrollingGraph.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -72,6 +73,7 @@
 		038BE88B2EF12ED100CC3968 /* Stopwatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stopwatch.swift; sourceTree = "<group>"; };
 		82838B4B2EFA7E930042D94F /* MatchedGeometryEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchedGeometryEffect.swift; sourceTree = "<group>"; };
 		82838B4D2EFB52E80042D94F /* FinishedEpisodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinishedEpisodes.swift; sourceTree = "<group>"; };
+		82838B4F2EFBC8280042D94F /* LargeScrollingGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeScrollingGraph.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,6 +130,7 @@
 				034CEA0E2EF7D0C3009B222E /* ButtonStack.swift */,
 				034CEA102EF8B650009B222E /* Magnification.swift */,
 				82838B4B2EFA7E930042D94F /* MatchedGeometryEffect.swift */,
+				82838B4F2EFBC8280042D94F /* LargeScrollingGraph.swift */,
 				038BE8832EEE8E0300CC3968 /* PracticeList.swift */,
 				038BE86D2EEBD39400CC3968 /* SwiftTalk */,
 			);
@@ -244,6 +247,7 @@
 				038BE88A2EEFCF6B00CC3968 /* ShoppingCart.swift in Sources */,
 				034CEA112EF8B65A009B222E /* Magnification.swift in Sources */,
 				038BE8792EEC141B00CC3968 /* Session.swift in Sources */,
+				82838B502EFBC82F0042D94F /* LargeScrollingGraph.swift in Sources */,
 				038BE8822EEE8AFA00CC3968 /* FlowLayout.swift in Sources */,
 				034CEA0D2EF7C7D1009B222E /* LabeledBar.swift in Sources */,
 				034CEA0F2EF7D0DD009B222E /* ButtonStack.swift in Sources */,
