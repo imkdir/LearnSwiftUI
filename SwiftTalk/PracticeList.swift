@@ -103,7 +103,7 @@ struct PracticeList: View {
                 case .largeScrollingGraph:
                     LargeScrollingGraph()
                 case .treeDiagram:
-                    TreeDiagramCanvas()
+                    TreeDiagramDemo()
                 }
             }
         }
