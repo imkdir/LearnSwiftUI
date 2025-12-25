@@ -10,7 +10,7 @@ import SwiftUI
 struct Tree<A>: Identifiable {
     let id = UUID()
     let value: A
-    let children: [Tree<A>]
+    var children: [Tree<A>]
     
     init(_ value: A, children: [Tree<A>] = []) {
         self.value = value
@@ -56,7 +56,7 @@ extension HorizontalAlignment {
 
 struct Diagram<A, Node: View>: View {
     let tree: Tree<A>
-    @ViewBuilder let node: (A) -> Node
+    @ViewBuilder let node: (Tree<A>) -> Node
     
     private let coordinate = "diagram"
     
@@ -98,7 +98,7 @@ struct Diagram<A, Node: View>: View {
     
     var body: some View {
         VStack(alignment: .nodeCenter, spacing: 16) {
-            node(tree.value)
+            node(tree)
                 .measureFrame(id: tree.id, in: coordinate)
             if !tree.children.isEmpty {
                 let guideIDs = generateGuideIDs(tree.children)
@@ -122,24 +122,34 @@ struct Diagram<A, Node: View>: View {
     }
 }
 
+extension Tree {
+    mutating func insert(value: A, parent: UUID) {
+        if parent == id {
+            children.append(.init(value))
+        } else {
+            for i in children.indices {
+                children[i].insert(value: value, parent: parent)
+            }
+        }
+    }
+    
+}
+
 struct TreeDiagramCanvas: View {
-    let sample = Tree("Root", children: [
-        .init("Child A w/ a long face"),
-        .init("Child B"),
-        .init("Child C", children: [
-            .init("Child D"),
-            .init("Child E"),
-        ])
-    ])
+    @State private var root = Tree("Root")
+    
     var body: some View {
-        Diagram(tree: sample) { value in
-            Text(value)
+        Diagram(tree: root) { subtree in
+            Text(subtree.value)
                 .font(.footnote)
                 .fixedSize()
                 .foregroundStyle(.white)
                 .padding(4)
                 .background(.blue)
                 .clipShape(RoundedRectangle(cornerRadius: 5))
+                .onTapGesture {
+                    root.insert(value: "New Leaf", parent: subtree.id)
+                }
         }
     }
 }
