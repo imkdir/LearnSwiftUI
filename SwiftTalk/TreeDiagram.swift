@@ -44,19 +44,25 @@ extension CGRect {
     }
 }
 
+struct Root {}
+struct Next<Level> {}
+
 extension HorizontalAlignment {
-    struct NodeCenter: AlignmentID {
+    struct NodeCenter<Level>: AlignmentID {
         static func defaultValue(in context: ViewDimensions) -> CGFloat {
             context[HorizontalAlignment.center]
         }
     }
     
-    static let nodeCenter = Self(NodeCenter.self)
+    static func nodeCenter<Level>(_ level: Level.Type) -> HorizontalAlignment {
+        HorizontalAlignment(NodeCenter<Level>.self)
+    }
 }
 
-struct Diagram<A, Node: View>: View {
+struct Diagram<L, A, Node: View>: View {
     let tree: Tree<A>
     @ViewBuilder let node: (Tree<A>) -> Node
+    let isCenterGuide: Bool
     
     func generateGuideIDs(_ items: [Tree<A>]) -> Set<UUID> {
         let cIndex = items.count / 2
@@ -67,20 +73,21 @@ struct Diagram<A, Node: View>: View {
     }
     
     var body: some View {
-        VStack(alignment: .nodeCenter, spacing: 16) {
+        VStack(alignment: .nodeCenter(Next<L>.self), spacing: 16) {
             node(tree)
                 .measureFrame(id: tree.id, in: canvas)
+                .alignmentGuide(isCenterGuide
+                    ? .nodeCenter(L.self) : .center
+                ) { $0[HorizontalAlignment.center] }
             if !tree.children.isEmpty {
                 let guideIDs = generateGuideIDs(tree.children)
                 HStack(alignment: .top, spacing: 10) {
                     ForEach(tree.children) {
-                        let alignment = guideIDs.contains($0.id)
-                            ? HorizontalAlignment.nodeCenter
-                            : .center
-                        Diagram(tree: $0, node: node)
-                            .alignmentGuide(alignment) {
-                                $0[HorizontalAlignment.center]
-                            }
+                        Diagram<Next<L>, A, Node>(
+                            tree: $0,
+                            node: node,
+                            isCenterGuide: guideIDs.contains($0.id)
+                        )
                     }
                 }
             }
@@ -130,8 +137,7 @@ extension Tree {
     
 }
 
-let canvas = NamedCoordinateSpace.named("canvas")
-
+private let canvas = NamedCoordinateSpace.named("canvas")
 
 struct Canvas<A, Node: View>: View {
     var tree: Tree<A>
@@ -142,14 +148,20 @@ struct Canvas<A, Node: View>: View {
     }
     
     var body: some View {
-        Diagram(tree: tree, node: node)
+        Diagram<Root, A, Node>(tree: tree, node: node, isCenterGuide: false)
             .coordinateSpace(canvas)
             .backgroundPreferenceValue(DiagramNodeFramePreference.self, background)
     }
 }
 
 struct TreeDiagramDemo: View {
-    @State private var root = Tree("Root")
+    @State private var root = Tree(
+        "Root",
+        children: [
+            .init("First Child w/ a long face"),
+            .init("Second Child")
+        ]
+    )
     
     var body: some View {
         Canvas(tree: root) { subtree in
