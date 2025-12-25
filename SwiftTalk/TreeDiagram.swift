@@ -44,11 +44,29 @@ extension CGRect {
     }
 }
 
+extension HorizontalAlignment {
+    struct NodeCenter: AlignmentID {
+        static func defaultValue(in context: ViewDimensions) -> CGFloat {
+            context[HorizontalAlignment.center]
+        }
+    }
+    
+    static let nodeCenter = Self(NodeCenter.self)
+}
+
 struct Diagram<A, Node: View>: View {
     let tree: Tree<A>
     @ViewBuilder let node: (A) -> Node
     
     private let coordinate = "diagram"
+    
+    func generateGuideIDs(_ items: [Tree<A>]) -> Set<UUID> {
+        let cIndex = items.count / 2
+        let indexes = items.count.isMultiple(of: 2)
+            ? [cIndex, cIndex-1]
+            : [cIndex]
+        return Set(indexes.map({ items[$0].id }))
+    }
     
     struct Line: Shape {
         let from: CGPoint
@@ -79,13 +97,22 @@ struct Diagram<A, Node: View>: View {
     }
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(alignment: .nodeCenter, spacing: 16) {
             node(tree.value)
                 .measureFrame(id: tree.id, in: coordinate)
-            HStack(spacing: 10) {
-                ForEach(tree.children) {
-                    Diagram(tree: $0, node: node)
-                        .measureFrame(id: $0.id, in: coordinate)
+            if !tree.children.isEmpty {
+                let guideIDs = generateGuideIDs(tree.children)
+                HStack(alignment: .top, spacing: 10) {
+                    ForEach(tree.children) {
+                        let alignment = guideIDs.contains($0.id)
+                            ? HorizontalAlignment.nodeCenter
+                            : .center
+                        Diagram(tree: $0, node: node)
+                            .measureFrame(id: $0.id, in: coordinate)
+                            .alignmentGuide(alignment) {
+                                $0[HorizontalAlignment.center]
+                            }
+                    }
                 }
             }
         }
@@ -98,7 +125,11 @@ struct Diagram<A, Node: View>: View {
 struct TreeDiagramCanvas: View {
     let sample = Tree("Root", children: [
         .init("Child A w/ a long face"),
-        .init("Child B")
+        .init("Child B"),
+        .init("Child C", children: [
+            .init("Child D"),
+            .init("Child E"),
+        ])
     ])
     var body: some View {
         Diagram(tree: sample) { value in
