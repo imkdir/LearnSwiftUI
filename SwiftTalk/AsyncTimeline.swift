@@ -86,13 +86,14 @@ extension Value: View {
         case .combined(let lhs, let rhs):
             HStack(spacing: 0) {
                 lhs
+                Text("|")
                 rhs
             }
         }
     }
 }
 
-struct TimelineView: View {
+struct Timeline: View {
     @Binding var events: [Event]
     let duration: TimeInterval
     
@@ -124,132 +125,201 @@ struct TimelineView: View {
     }
 }
 
-struct TimedEventStream: AsyncSequence, Sendable {
-    typealias Element = Event
-    let events: [Event]
-    let speed: TimeInterval
-    
-    nonisolated func makeAsyncIterator() -> AsyncStream<Event>.Iterator {
-        AsyncStream { continuation in
-            let sortedEvents = events.sorted()
-            let task = Task {
-                let start = Date()
-                for event in sortedEvents {
-                    let interval = event.time / speed
-                    let diff = Date().timeIntervalSince(start)
-                    if interval > diff {
-                        try? await Task.sleep(nanoseconds: UInt64((interval - diff) * 1_000_000_000))
-                    }
-                    continuation.yield(event)
-                }
-                continuation.finish()
-            }
-            continuation.onTermination = { _ in
-                task.cancel()
-            }
-        }.makeAsyncIterator()
-    }
-}
-
 extension Array where Element == Event {
-    func stream(speed: TimeInterval = 1.0) -> TimedEventStream {
-        TimedEventStream(events: self, speed: speed)
+    @MainActor
+    func stream(_ speed: TimeInterval) -> AsyncStream<Event> {
+        AsyncStream { continuation in
+            sorted().enumerated().forEach { idx, event in
+                Timer.scheduledTimer(withTimeInterval: event.time / speed, repeats: false) { _ in
+                    continuation.yield(event)
+                    if idx == count - 1 {
+                        continuation.finish()
+                    }
+                }
+            }
+        }
     }
 }
 
-func run(algorithm: Algorithm, _ lhs: [Event], _ rhs: [Event]) async -> [Event] {
-    let speed: Double = 10
-    let lhs = lhs.stream(speed: speed)
-    let rhs = rhs.stream(speed: speed)
-    
-    var result: [Event] = []
-    let start = Date()
-    var interval: TimeInterval {
-        Date().timeIntervalSince(start) * speed
+extension AsyncSequence {
+    var stream: AsyncStream<Element> {
+        var it = makeAsyncIterator()
+        return AsyncStream<Element> {
+            do {
+                return try await it.next()
+            } catch {
+                fatalError()
+            }
+        }
     }
-    switch algorithm {
-    case .merge:
-        for await event in merge(lhs, rhs) {
+}
+
+extension Stream {
+    
+    struct Context {
+        let lhs: [Event]
+        let rhs: [Event]
+        let speed: Double = 10.0
+    }
+
+    func drain(_ context: Context) async -> [Event] {
+        var result: [Event] = []
+        let start = Date()
+        var interval: TimeInterval {
+            Date().timeIntervalSince(start) * context.speed
+        }
+        for await event in await build(context) {
             result.append(.init(id: event.id, time: interval, color: event.color, value: event.value))
         }
-    case .chain:
-        for await event in chain(lhs, rhs) {
-            result.append(.init(id: event.id, time: interval, color: event.color, value: event.value))
-        }
-    case .zip:
-        for await (e0, e1) in zip(lhs, rhs) {
-            result.append(.init(id: .combined(e0.id, e1.id), time: interval, color: .green, value: .combined(e0.value, e1.value)))
-        }
-    case .combineLatest:
-        for await (e0, e1) in combineLatest(lhs, rhs) {
-            result.append(.init(id: .combined(e0.id, e1.id), time: interval, color: .green, value: .combined(e0.value, e1.value)))
-        }
-    case .adjacentPairs:
-        for await (e0, e1) in lhs.adjacentPairs() {
-            result.append(.init(id: .combined(e0.id, e1.id), time: interval, color: .green, value: .combined(e0.value, e1.value)))
+        return result
+    }
+    
+    func build(_ context: Context) async -> AsyncStream<Event> {
+        switch self {
+        case .input1:
+            return context.lhs.stream(context.speed)
+            
+        case .input2:
+            return context.rhs.stream(context.speed)
+            
+        case .merged(let lhs, let rhs):
+            async let as1 = lhs.build(context)
+            async let as2 = rhs.build(context)
+            
+            return await merge(as1, as2).stream
+            
+        case .chained(let lhs, let rhs):
+            async let as1 = lhs.build(context)
+            async let as2 = rhs.build(context)
+            
+            return await chain(as1, as2).stream
+            
+        case .zipped(let lhs, let rhs):
+            async let as1 = lhs.build(context)
+            async let as2 = rhs.build(context)
+            
+            return await zip(as1, as2).map(+).stream
+            
+        case .combinedLatest(let lhs, let rhs):
+            async let as1 = lhs.build(context)
+            async let as2 = rhs.build(context)
+            
+            return await combineLatest(as1, as2).map(+).stream
+            
+        case .adjacentPaired(let val):
+            async let result = val.build(context)
+            return await result.adjacentPairs().map(+).stream
         }
     }
-    return result
 }
 
-enum Algorithm: String, CaseIterable, Identifiable {
-    case merge, chain, zip, combineLatest, adjacentPairs
-    
-    var id: Self { self }
+extension Event {
+    static func +(lhs: Event, rhs: Event) -> Event {
+        .init(
+            id: .combined(lhs.id, rhs.id),
+            time: 0,
+            color: .green,
+            value: .combined(lhs.value, rhs.value)
+        )
+    }
 }
 
-struct AsyncAlgorithm: View {
-    let algorithm: Algorithm
+indirect enum Stream: Equatable {
+    case input1
+    case input2
+    case merged(Stream, Stream)
+    case chained(Stream, Stream)
+    case zipped(Stream, Stream)
+    case combinedLatest(Stream, Stream)
+    case adjacentPaired(Stream)
     
-    @State private var sample0: [Event] = sampleInt
-    @State private var sample1: [Event] = sampleString
-    @State private var results: [Event]? = nil
+    var label: Text {
+        switch self {
+        case .input1:
+            Text("input1").foregroundStyle(.red)
+        case .input2:
+            Text("input2").foregroundStyle(.blue)
+        case .merged(let lhs, let rhs):
+            Text("merge(\(lhs.label), \(rhs.label))")
+        case .chained(let lhs, let rhs):
+            Text("chain(\(lhs.label), \(rhs.label)")
+        case .zipped(let lhs, let rhs):
+            Text("zip(\(lhs.label), \(rhs.label)")
+        case .combinedLatest(let lhs, let rhs):
+            Text("combineLatest(\(lhs.label), \(rhs.label)")
+        case .adjacentPaired(let stream):
+            Text("\(stream.label).adjacentPairs")
+        }
+    }
+}
+
+struct UniqueStream: Equatable, Identifiable {
+    let id = UUID()
+    let stream: Stream
+    
+    nonisolated init(_ stream: Stream) {
+        self.stream = stream
+    }
+}
+
+struct StreamMap: View {
+    @State private var streams: [UniqueStream] = [
+        .input1, .input2
+    ].map(UniqueStream.init)
+    @State private var selection: Set<UniqueStream.ID> = []
+    
+    @State private var sample1: [Event] = sampleInt
+    @State private var sample2: [Event] = sampleString
+    @State private var results: [UniqueStream.ID: [Event]] = [:]
     @State private var loading: Bool = false
     
+    struct TaskID: Equatable {
+        let events: [Event]
+        let streams: [UniqueStream]
+    }
+    
     var duration: TimeInterval {
-        (sample0 + sample1 + (results ?? []))
+        (sample1 + sample2 + (results.values.flatMap({ $0 })))
             .lazy.map({ $0.time })
             .max() ?? 1.0
     }
     
+    func events(_ id: UniqueStream.ID) -> Binding<[Event]> {
+        .constant(results[id, default: []])
+    }
+    
     var body: some View {
-        VStack {
-            TimelineView(events: $sample0, duration: duration)
-            if algorithm != .adjacentPairs {
-                TimelineView(events: $sample1, duration: duration)
+        List(streams, selection: $selection) { us in
+            VStack(alignment: .leading) {
+                switch us.stream {
+                case .input1:
+                    Timeline(events: $sample1, duration: duration)
+                case .input2:
+                    Timeline(events: $sample2, duration: duration)
+                default:
+                    Timeline(events: events(us.id), duration: duration )
+                }
+                us.stream.label
+                    .font(.footnote)
             }
-            TimelineView(events: .constant(results ?? []), duration: duration)
-                .opacity(loading ? 0.5 : 1.0)
-                .animation(.default, value: results)
         }
         .padding(20)
-        .task(id: sample0 + sample1) {
+        .task(id: TaskID(events: sample1 + sample2, streams: streams)) {
             loading = true
-            results = await run(algorithm: algorithm, sample0, sample1)
+            let context = Stream.Context(lhs: sample1, rhs: sample2)
+            results = await withTaskGroup(of: (UUID, [Event]).self) { group in
+                streams.forEach { us in
+                    group.addTask {
+                        (us.id, await us.stream.drain(context))
+                    }
+                }
+                return await Dictionary(uniqueKeysWithValues: group)
+            }
             loading = false
         }
     }
 }
 
-struct AsyncTimelineDemo: View {
-    @State private var selection: Algorithm = .merge
-    
-    var body: some View {
-        TabView(selection: $selection) {
-            ForEach(Algorithm.allCases) { algorithm in
-                VStack {
-                    Text(algorithm.rawValue)
-                        .font(.largeTitle)
-                    AsyncAlgorithm(algorithm: algorithm)
-                    Divider()
-                }
-                .tag(algorithm)
-            }
-        }
-        .tabViewStyle(.page)
-    }
-}
-
 #Preview {
-    AsyncTimelineDemo()
+    StreamMap()
 }

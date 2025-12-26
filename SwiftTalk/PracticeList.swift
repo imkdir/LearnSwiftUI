@@ -108,7 +108,7 @@ struct PracticeList: View {
                 case .treeDiagram:
                     TreeDiagramDemo()
                 case .asyncTimeline:
-                    AsyncTimelineDemo()
+                    StreamMap()
                 }
             }
         }
