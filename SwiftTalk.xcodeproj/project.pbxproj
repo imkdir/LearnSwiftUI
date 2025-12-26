@@ -41,6 +41,7 @@
 		82838B4E2EFB52E80042D94F /* FinishedEpisodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4D2EFB52E80042D94F /* FinishedEpisodes.swift */; };
 		82838B502EFBC82F0042D94F /* LargeScrollingGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4F2EFBC8280042D94F /* LargeScrollingGraph.swift */; };
 		82838B522EFCE4E70042D94F /* TreeDiagram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B512EFCE4E00042D94F /* TreeDiagram.swift */; };
+		82838B542EFE2D700042D94F /* AsyncTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B532EFE2D670042D94F /* AsyncTimeline.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -76,6 +77,7 @@
 		82838B4D2EFB52E80042D94F /* FinishedEpisodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinishedEpisodes.swift; sourceTree = "<group>"; };
 		82838B4F2EFBC8280042D94F /* LargeScrollingGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeScrollingGraph.swift; sourceTree = "<group>"; };
 		82838B512EFCE4E00042D94F /* TreeDiagram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeDiagram.swift; sourceTree = "<group>"; };
+		82838B532EFE2D670042D94F /* AsyncTimeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncTimeline.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +136,7 @@
 				82838B4B2EFA7E930042D94F /* MatchedGeometryEffect.swift */,
 				82838B4F2EFBC8280042D94F /* LargeScrollingGraph.swift */,
 				82838B512EFCE4E00042D94F /* TreeDiagram.swift */,
+				82838B532EFE2D670042D94F /* AsyncTimeline.swift */,
 				038BE8832EEE8E0300CC3968 /* PracticeList.swift */,
 				038BE86D2EEBD39400CC3968 /* SwiftTalk */,
 			);
@@ -263,6 +266,7 @@
 				038BE8802EEE3BC700CC3968 /* TravlerEffect.swift in Sources */,
 				038BE8682EEBB32A00CC3968 /* Resource.swift in Sources */,
 				034CEA072EF2F3FE009B222E /* MapView.swift in Sources */,
+				82838B542EFE2D700042D94F /* AsyncTimeline.swift in Sources */,
 				038BE8692EEBB32A00CC3968 /* SwiftTalk.swift in Sources */,
 				038BE86A2EEBB32A00CC3968 /* SwiftTalkApp.swift in Sources */,
 			);

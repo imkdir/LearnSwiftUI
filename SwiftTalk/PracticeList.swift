@@ -23,6 +23,7 @@ enum Practice: String, Identifiable, CaseIterable {
     case matchedGeometryEffect
     case largeScrollingGraph
     case treeDiagram
+    case asyncTimeline
     
     var id: Self {
         self
@@ -60,6 +61,8 @@ enum Practice: String, Identifiable, CaseIterable {
             "Large Scrolling Graph"
         case .treeDiagram:
             "Tree Diagram"
+        case .asyncTimeline:
+            "Async Timeline"
         }
     }
 }
@@ -104,6 +107,8 @@ struct PracticeList: View {
                     LargeScrollingGraph()
                 case .treeDiagram:
                     TreeDiagramDemo()
+                case .asyncTimeline:
+                    AsyncTimelineDemo()
                 }
             }
         }
