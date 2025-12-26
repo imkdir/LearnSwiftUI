@@ -6,12 +6,49 @@
 //
 
 import SwiftUI
+import AsyncAlgorithms
 
 struct Event: Identifiable, Hashable, Sendable {
     let id: Int
-    let time: TimeInterval
+    var time: TimeInterval
     let color: Color
     let value: Value
+}
+
+extension Event: Comparable {
+    static func < (lhs: Event, rhs: Event) -> Bool {
+        lhs.time < rhs.time
+    }
+}
+
+extension EnvironmentValues {
+    @Entry var secondsPerPoint: CGFloat = 0
+}
+
+struct EventNode: View {
+    @Binding var event: Event
+    @GestureState private var offset: CGFloat = 0
+    @Environment(\.secondsPerPoint) private var scale
+    
+    var gesture: some Gesture {
+        DragGesture()
+            .updating($offset) { value, state, _ in
+                state = value.translation.width
+            }
+            .onEnded { value in
+                event.time += value.translation.width * scale
+            }
+    }
+    
+    var body: some View {
+        event.value
+            .frame(width: 30, height: 30)
+            .background {
+                Circle().fill(event.color)
+            }
+            .offset(x: offset)
+            .gesture(gesture)
+    }
 }
 
 enum Value: Hashable, Sendable {
@@ -19,7 +56,7 @@ enum Value: Hashable, Sendable {
     case string(String)
 }
 
-let sampleInt: [Event] = [
+private let sampleInt: [Event] = [
     .init(id: 0, time: 0, color: .red, value: .int(1)),
     .init(id: 1, time: 1, color: .red, value: .int(2)),
     .init(id: 2, time: 2, color: .red, value: .int(3)),
@@ -27,7 +64,7 @@ let sampleInt: [Event] = [
     .init(id: 4, time: 8, color: .red, value: .int(5))
 ]
 
-let sampleString: [Event] = [
+private let sampleString: [Event] = [
     .init(id: 100_0, time: 1.5, color: .blue, value: .string("a")),
     .init(id: 100_1, time: 2.5, color: .blue, value: .string("b")),
     .init(id: 100_2, time: 4.5, color: .blue, value: .string("c")),
@@ -44,18 +81,8 @@ extension Value: View {
     }
 }
 
-struct Timed: ViewModifier {
-    let duration: TimeInterval
-    let containerSize: CGSize
-    let time: TimeInterval
-    let size: CGSize
-    
-    func body(content: Content) -> some View {
-    }
-}
-
 struct TimelineView: View {
-    let events: [Event]
+    @Binding var events: [Event]
     let duration: TimeInterval
     
     var body: some View {
@@ -73,33 +100,104 @@ struct TimelineView: View {
                         }
                 }
                 .offset(x: 15)
-                ForEach(events) { event in
-                    event.value
-                        .frame(width: 30, height: 30)
-                        .background {
-                            Circle().fill(event.color)
-                        }
+                ForEach($events) { $event in
+                    EventNode(event: $event)
                         .alignmentGuide(.leading) { _ in
                             (30 - proxy.size.width) * (event.time / duration)
                         }
                 }
             }
+            .environment(\.secondsPerPoint, duration/(proxy.size.width-30))
         }
         .frame(height: 30)
     }
 }
 
-struct AsyncTimelineDemo: View {
+extension Array where Element == Event {
+    @MainActor
+    func stream(speed: TimeInterval = 1.0) -> AsyncStream<Event> {
+        AsyncStream { continuation in
+            sorted().enumerated().forEach { idx, event in
+                Timer.scheduledTimer(withTimeInterval: event.time / speed, repeats: false) { _ in
+                    continuation.yield(event)
+                    if idx == count - 1 {
+                        continuation.finish()
+                    }
+                }
+            }
+        }
+    }
+}
+
+func run(algorithm: Algorithm, _ lhs: [Event], _ rhs: [Event]) async -> [Event] {
+    let speed: Double = 10
+    let lhs = lhs.stream(speed: speed)
+    let rhs = rhs.stream(speed: speed)
+    
+    switch algorithm {
+    case .merge:
+        let merged = merge(lhs, rhs)
+        return await Array(merged)
+    case .chain:
+        var result: [Event] = []
+        let start = Date()
+        for await event in chain(lhs, rhs) {
+            let interval = Date().timeIntervalSince(start) * speed
+            result.append(.init(id: event.id, time: interval, color: event.color, value: event.value))
+        }
+        return result
+    }
+}
+
+enum Algorithm: String, CaseIterable, Identifiable {
+    case merge, chain
+    
+    var id: Self { self }
+}
+
+struct AsyncAlgorithm: View {
+    let algorithm: Algorithm
+    
+    @State private var sample0: [Event] = sampleInt
+    @State private var sample1: [Event] = sampleString
+    @State private var results: [Event]? = nil
+    @State private var loading: Bool = false
+    
     var duration: TimeInterval {
-        max(sampleInt.last!.time, sampleString.last!.time)
+        (sample0 + sample1 + (results ?? []))
+            .lazy.map({ $0.time })
+            .max() ?? 1.0
     }
     
     var body: some View {
         VStack {
-            TimelineView(events: sampleInt, duration: duration)
-            TimelineView(events: sampleString, duration: duration)
+            TimelineView(events: $sample0, duration: duration)
+            TimelineView(events: $sample1, duration: duration)
+            TimelineView(events: .constant(results ?? []), duration: duration)
+                .opacity(loading ? 0.5 : 1.0)
+                .animation(.default, value: results)
         }
         .padding(20)
+        .task(id: sample0 + sample1) {
+            loading = true
+            results = await run(algorithm: algorithm, sample0, sample1)
+            loading = false
+        }
+    }
+}
+
+struct AsyncTimelineDemo: View {
+    
+    var body: some View {
+        VStack {
+            ForEach(Algorithm.allCases) {
+                Text($0.rawValue)
+                    .padding(4)
+                    .border(.secondary)
+                AsyncAlgorithm(algorithm: $0)
+                Divider()
+            }
+        }
     }
 }
 

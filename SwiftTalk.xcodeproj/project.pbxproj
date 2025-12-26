@@ -42,6 +42,7 @@
 		82838B502EFBC82F0042D94F /* LargeScrollingGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4F2EFBC8280042D94F /* LargeScrollingGraph.swift */; };
 		82838B522EFCE4E70042D94F /* TreeDiagram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B512EFCE4E00042D94F /* TreeDiagram.swift */; };
 		82838B542EFE2D700042D94F /* AsyncTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B532EFE2D670042D94F /* AsyncTimeline.swift */; };
+		82838B572EFE538B0042D94F /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 82838B562EFE538B0042D94F /* AsyncAlgorithms */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -89,6 +90,7 @@
 				038BE8552EEAA7D400CC3968 /* Model in Frameworks */,
 				038BE8502EEA986300CC3968 /* TinyNetworking in Frameworks */,
 				038BE87C2EEC1D9D00CC3968 /* KeychainItem in Frameworks */,
+				82838B572EFE538B0042D94F /* AsyncAlgorithms in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -179,6 +181,7 @@
 				038BE8542EEAA7D400CC3968 /* Model */,
 				038BE8562EEAA7D400CC3968 /* ViewHelpers */,
 				038BE87B2EEC1D9D00CC3968 /* KeychainItem */,
+				82838B562EFE538B0042D94F /* AsyncAlgorithms */,
 			);
 			productName = CurrencyConverter;
 			productReference = 038BE8342EEA83FE00CC3968 /* SwiftTalk.app */;
@@ -212,6 +215,7 @@
 				038BE84E2EEA986300CC3968 /* XCRemoteSwiftPackageReference "tiny-networking" */,
 				038BE8532EEAA7D400CC3968 /* XCRemoteSwiftPackageReference "swift-talk-shared" */,
 				038BE87A2EEC1D9D00CC3968 /* XCRemoteSwiftPackageReference "keychain-item" */,
+				82838B552EFE538B0042D94F /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 038BE8352EEA83FE00CC3968 /* Products */;
@@ -537,6 +541,14 @@
 				minimumVersion = 0.1.0;
 			};
 		};
+		82838B552EFE538B0042D94F /* XCRemoteSwiftPackageReference "swift-async-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-async-algorithms.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -559,6 +571,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 038BE87A2EEC1D9D00CC3968 /* XCRemoteSwiftPackageReference "keychain-item" */;
 			productName = KeychainItem;
+		};
+		82838B562EFE538B0042D94F /* AsyncAlgorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82838B552EFE538B0042D94F /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
+			productName = AsyncAlgorithms;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
