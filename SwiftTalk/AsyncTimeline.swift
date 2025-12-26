@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 import AsyncAlgorithms
 
 struct Event: Identifiable, Hashable, Sendable {
@@ -86,7 +87,6 @@ extension Value: View {
         case .combined(let lhs, let rhs):
             HStack(spacing: 0) {
                 lhs
-                Text("|")
                 rhs
             }
         }
@@ -174,6 +174,7 @@ extension Stream {
         return result
     }
     
+    @MainActor
     func build(_ context: Context) async -> AsyncStream<Event> {
         switch self {
         case .input1:
@@ -218,7 +219,7 @@ extension Event {
         .init(
             id: .combined(lhs.id, rhs.id),
             time: 0,
-            color: .green,
+            color: .init(uiColor: .magenta),
             value: .combined(lhs.value, rhs.value)
         )
     }
@@ -242,11 +243,11 @@ indirect enum Stream: Equatable {
         case .merged(let lhs, let rhs):
             Text("merge(\(lhs.label), \(rhs.label))")
         case .chained(let lhs, let rhs):
-            Text("chain(\(lhs.label), \(rhs.label)")
+            Text("chain(\(lhs.label), \(rhs.label))")
         case .zipped(let lhs, let rhs):
-            Text("zip(\(lhs.label), \(rhs.label)")
+            Text("zip(\(lhs.label), \(rhs.label))")
         case .combinedLatest(let lhs, let rhs):
-            Text("combineLatest(\(lhs.label), \(rhs.label)")
+            Text("combineLatest(\(lhs.label), \(rhs.label))")
         case .adjacentPaired(let stream):
             Text("\(stream.label).adjacentPairs")
         }
@@ -263,8 +264,9 @@ struct UniqueStream: Equatable, Identifiable {
 }
 
 struct StreamMap: View {
+    @State private var editMode: EditMode = .inactive
     @State private var streams: [UniqueStream] = [
-        .input1, .input2
+        .input2, .input1
     ].map(UniqueStream.init)
     @State private var selection: Set<UniqueStream.ID> = []
     
@@ -272,6 +274,7 @@ struct StreamMap: View {
     @State private var sample2: [Event] = sampleString
     @State private var results: [UniqueStream.ID: [Event]] = [:]
     @State private var loading: Bool = false
+    @State private var cancellables: Set<AnyCancellable> = []
     
     struct TaskID: Equatable {
         let events: [Event]
@@ -289,6 +292,24 @@ struct StreamMap: View {
     }
     
     var body: some View {
+        NavigationStack {
+            VStack {
+                list
+                actionStack
+            }
+            .environment(\.editMode, $editMode)
+            .onChange(of: selection) { oldValue, newValue in
+                if oldValue.isEmpty {
+                    editMode = .active
+                    DispatchQueue.main.async {
+                        selection = newValue
+                    }
+                }
+            }
+        }
+    }
+    
+    var list: some View {
         List(streams, selection: $selection) { us in
             VStack(alignment: .leading) {
                 switch us.stream {
@@ -302,6 +323,8 @@ struct StreamMap: View {
                 us.stream.label
                     .font(.footnote)
             }
+            .listRowBackground(Color.primary.opacity(0.1))
+            .animation(.smooth, value: results)
         }
         .padding(20)
         .task(id: TaskID(events: sample1 + sample2, streams: streams)) {
@@ -317,6 +340,59 @@ struct StreamMap: View {
             }
             loading = false
         }
+    }
+    
+    func add(_ stream: Stream) {
+        streams.insert(.init(stream), at: 0)
+        editMode = .inactive
+    }
+    
+    var actionStack: some View {
+        HStack {
+            let selected = streams
+                .filter({ selection.contains($0.id) })
+            if selection.count == 1 {
+                let stream = selected[0].stream
+                Button {
+                    add(stream)
+                } label: {
+                    Text("adjacentPairs")
+                }
+            } else if selection.count == 2 {
+                let lhs = selected[0].stream
+                let rhs = selected[1].stream
+                Button {
+                    add(.merged(lhs, rhs))
+                } label: {
+                    Text("merge")
+                }
+                Button {
+                    add(.chained(lhs, rhs))
+                } label: {
+                    Text("chain")
+                }
+                Button {
+                    add(.zipped(lhs, rhs))
+                } label: {
+                    Text("zip")
+                }
+                Button {
+                    add(.combinedLatest(lhs, rhs))
+                } label: {
+                    Text("combineLatest")
+                }
+            }
+            if editMode == .active || !selection.isEmpty {
+                Button {
+                    selection.removeAll()
+                    editMode = .inactive
+                } label: {
+                    Text("Cancel")
+                }
+                .buttonStyle(.glass)
+            }
+        }
+        .buttonStyle(.glassProminent)
     }
 }
 
