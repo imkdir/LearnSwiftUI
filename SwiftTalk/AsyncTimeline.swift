@@ -22,9 +22,22 @@ extension Event: Comparable {
     }
 }
 
+enum Value: Hashable, Sendable {
+    case int(Int)
+    case string(String)
+    indirect case combined(Value, Value)
+}
+
+indirect enum EventID: Hashable, Sendable {
+    case single(UUID)
+    case combined(EventID, EventID)
+}
+
 extension EnvironmentValues {
     @Entry var secondsPerPoint: CGFloat = 0
 }
+
+private let itemSize = CGFloat(30)
 
 struct EventNode: View {
     @Binding var event: Event
@@ -43,7 +56,7 @@ struct EventNode: View {
     
     var body: some View {
         event.value
-            .frame(width: 30, height: 30)
+            .frame(width: itemSize, height: itemSize)
             .background {
                 Circle().fill(event.color)
             }
@@ -51,33 +64,6 @@ struct EventNode: View {
             .gesture(gesture)
     }
 }
-
-enum Value: Hashable, Sendable {
-    case int(Int)
-    case string(String)
-    indirect case combined(Value, Value)
-}
-
-indirect enum EventID: Hashable, Sendable {
-    case single(UUID)
-    case combined(EventID, EventID)
-}
-
-private let sampleInt: [Event] = [
-    .init(time: 0, color: .red, value: .int(1)),
-    .init(time: 1, color: .red, value: .int(2)),
-    .init(time: 2, color: .red, value: .int(3)),
-    .init(time: 5, color: .red, value: .int(4)),
-    .init(time: 8, color: .red, value: .int(5))
-]
-
-private let sampleString: [Event] = [
-    .init(time: 1.5, color: .blue, value: .string("a")),
-    .init(time: 2.5, color: .blue, value: .string("b")),
-    .init(time: 4.5, color: .blue, value: .string("c")),
-    .init(time: 6.5, color: .blue, value: .string("d")),
-    .init(time: 7.5, color: .blue, value: .string("e"))
-]
 
 extension Value: View {
     var body: some View {
@@ -94,32 +80,37 @@ extension Value: View {
 }
 
 struct Timeline: View {
+    
     @Binding var events: [Event]
     let duration: TimeInterval
     
     var body: some View {
         GeometryReader { proxy in
+            let contentSize = proxy.size.width - itemSize
+            
             ZStack(alignment: .leading) {
                 Rectangle()
                     .fill(Color.secondary)
                     .frame(height: 1)
+                
                 ForEach(0...Int(duration.rounded(.up)), id: \.self) { tick in
                     Rectangle()
                         .frame(width: 1)
                         .foregroundStyle(.secondary)
                         .alignmentGuide(.leading) { _ in
-                            (30 - proxy.size.width) * (Double(tick) / duration)
+                            -contentSize * (Double(tick) / duration)
                         }
                 }
-                .offset(x: 15)
+                .offset(x: itemSize / 2.0)
+                
                 ForEach($events) { $event in
                     EventNode(event: $event)
                         .alignmentGuide(.leading) { _ in
-                            (30 - proxy.size.width) * (event.time / duration)
+                             -contentSize * (event.time / duration)
                         }
                 }
             }
-            .environment(\.secondsPerPoint, duration/(proxy.size.width-30))
+            .environment(\.secondsPerPoint, duration/contentSize)
         }
         .frame(height: 30)
     }
@@ -130,7 +121,10 @@ extension Array where Element == Event {
     func stream(_ speed: TimeInterval) -> AsyncStream<Event> {
         AsyncStream { continuation in
             sorted().enumerated().forEach { idx, event in
-                Timer.scheduledTimer(withTimeInterval: event.time / speed, repeats: false) { _ in
+                Timer.scheduledTimer(
+                    withTimeInterval: event.time / speed,
+                    repeats: false
+                ) { _ in
                     continuation.yield(event)
                     if idx == count - 1 {
                         continuation.finish()
@@ -154,6 +148,16 @@ extension AsyncSequence {
     }
 }
 
+indirect enum Stream: Equatable {
+    case input1
+    case input2
+    case merged(Stream, Stream)
+    case chained(Stream, Stream)
+    case zipped(Stream, Stream)
+    case combinedLatest(Stream, Stream)
+    case adjacentPaired(Stream)
+}
+
 extension Stream {
     
     struct Context {
@@ -169,7 +173,7 @@ extension Stream {
             Date().timeIntervalSince(start) * context.speed
         }
         for await event in await build(context) {
-            result.append(.init(id: event.id, time: interval, color: event.color, value: event.value))
+            result.append(.init(event: event, time: interval))
         }
         return result
     }
@@ -209,6 +213,7 @@ extension Stream {
             
         case .adjacentPaired(let val):
             async let result = val.build(context)
+            
             return await result.adjacentPairs().map(+).stream
         }
     }
@@ -223,16 +228,16 @@ extension Event {
             value: .combined(lhs.value, rhs.value)
         )
     }
+    
+    init(event: Event, time: TimeInterval) {
+        self.id = event.id
+        self.time = time
+        self.color = event.color
+        self.value = event.value
+    }
 }
 
-indirect enum Stream: Equatable {
-    case input1
-    case input2
-    case merged(Stream, Stream)
-    case chained(Stream, Stream)
-    case zipped(Stream, Stream)
-    case combinedLatest(Stream, Stream)
-    case adjacentPaired(Stream)
+extension Stream {
     
     var label: Text {
         switch self {
@@ -361,26 +366,10 @@ struct StreamMap: View {
             } else if selection.count == 2 {
                 let lhs = selected[0].stream
                 let rhs = selected[1].stream
-                Button {
-                    add(.merged(lhs, rhs))
-                } label: {
-                    Text("merge")
-                }
-                Button {
-                    add(.chained(lhs, rhs))
-                } label: {
-                    Text("chain")
-                }
-                Button {
-                    add(.zipped(lhs, rhs))
-                } label: {
-                    Text("zip")
-                }
-                Button {
-                    add(.combinedLatest(lhs, rhs))
-                } label: {
-                    Text("combineLatest")
-                }
+                Button { add(.merged(lhs, rhs)) } label: { Text("merge") }
+                Button { add(.chained(lhs, rhs)) } label: { Text("chain") }
+                Button { add(.zipped(lhs, rhs)) } label: { Text("zip") }
+                Button { add(.combinedLatest(lhs, rhs)) } label: { Text("combineLatest") }
             }
             if editMode == .active || !selection.isEmpty {
                 Button {
@@ -395,6 +384,23 @@ struct StreamMap: View {
         .buttonStyle(.glassProminent)
     }
 }
+
+private let sampleInt: [Event] = [
+    .init(time: 0, color: .red, value: .int(1)),
+    .init(time: 1, color: .red, value: .int(2)),
+    .init(time: 2, color: .red, value: .int(3)),
+    .init(time: 5, color: .red, value: .int(4)),
+    .init(time: 8, color: .red, value: .int(5))
+]
+
+private let sampleString: [Event] = [
+    .init(time: 1.5, color: .blue, value: .string("a")),
+    .init(time: 2.5, color: .blue, value: .string("b")),
+    .init(time: 4.5, color: .blue, value: .string("c")),
+    .init(time: 6.5, color: .blue, value: .string("d")),
+    .init(time: 7.5, color: .blue, value: .string("e"))
+]
+
 
 #Preview {
     StreamMap()
