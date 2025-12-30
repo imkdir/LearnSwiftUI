@@ -186,8 +186,27 @@ struct PhotoGrid: View {
             origin + value.translation
         }
         
-        var directionToTarget: CGPoint? {
+        var direction: CGPoint? {
             target.map({ $0 - currentPosition })
+        }
+        
+        var initialVelocity: CGFloat? {
+            /*
+             This property from the DragGesture gives you the velocity of the user's flick as a 2D vector (a CGSize in this case). It tells you how fast and in what direction the finger was moving in points per second when it was lifted.
+             */
+            let velocity = value.velocity
+            /*
+             This is a vector you calculated that points from the photo's current position to its final destination (either back to its spot in the grid or back to the center of the screen). This represents the path the animation will follow.
+             */
+            guard let direction else { return nil }
+            /*
+             We need to find the component of the flick velocity that is parallel to the animation's direction. This is done using a mathematical operation called a scalar projection.
+             */
+            let projected = velocity.dot(direction) / direction.length
+            /*
+             The initialVelocity parameter for interpolatingSpring is special. It doesn't want an absolute value like points per second. It wants a relative value: the initial velocity specified as a multiple of the total animation distance per second.
+             */
+            return projected / direction.length
         }
         
         var shouldClose: Bool {
@@ -198,10 +217,14 @@ struct PhotoGrid: View {
             ZStack {
                 Ray(start: value.location, end: value.predictedEndLocation)
                     .foregroundStyle(Color.orange)
-                directionToTarget.map({
-                    Ray(start: value.location, end: value.location + $0)
+                if let d = direction {
+                    Ray(start: value.location, end: value.location + d)
                         .foregroundStyle(Color.blue)
-                })
+                    if let v = initialVelocity {
+                        Ray(start: value.location, end: value.location + d * v)
+                            .foregroundStyle(.green)
+                    }
+                }
             }
         }
     }
@@ -306,7 +329,8 @@ struct PhotoGrid: View {
                     ? gridCenterMap[detail, default: .zero] : detailCenter
                 
                 debugDragState = dragState
-                withAnimation(.interpolatingSpring(mass: 1, stiffness: 200, damping: 100, initialVelocity: 0).speed(speed)) {
+                
+                withAnimation(.interpolatingSpring(mass: 5, stiffness: 200, damping: 100, initialVelocity: dragState.initialVelocity ?? .zero).speed(speed)) {
                     self.dragState = nil
                     if dragState.shouldClose {
                         self.detail = nil
