@@ -43,6 +43,7 @@
 		82838B522EFCE4E70042D94F /* TreeDiagram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B512EFCE4E00042D94F /* TreeDiagram.swift */; };
 		82838B542EFE2D700042D94F /* AsyncTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B532EFE2D670042D94F /* AsyncTimeline.swift */; };
 		82838B572EFE538B0042D94F /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 82838B562EFE538B0042D94F /* AsyncAlgorithms */; };
+		82838B592F02BA100042D94F /* PhotoGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B582F02BA0B0042D94F /* PhotoGrid.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -79,6 +80,7 @@
 		82838B4F2EFBC8280042D94F /* LargeScrollingGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeScrollingGraph.swift; sourceTree = "<group>"; };
 		82838B512EFCE4E00042D94F /* TreeDiagram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeDiagram.swift; sourceTree = "<group>"; };
 		82838B532EFE2D670042D94F /* AsyncTimeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncTimeline.swift; sourceTree = "<group>"; };
+		82838B582F02BA0B0042D94F /* PhotoGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoGrid.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -139,6 +141,7 @@
 				82838B4F2EFBC8280042D94F /* LargeScrollingGraph.swift */,
 				82838B512EFCE4E00042D94F /* TreeDiagram.swift */,
 				82838B532EFE2D670042D94F /* AsyncTimeline.swift */,
+				82838B582F02BA0B0042D94F /* PhotoGrid.swift */,
 				038BE8832EEE8E0300CC3968 /* PracticeList.swift */,
 				038BE86D2EEBD39400CC3968 /* SwiftTalk */,
 			);
@@ -260,6 +263,7 @@
 				82838B502EFBC82F0042D94F /* LargeScrollingGraph.swift in Sources */,
 				038BE8822EEE8AFA00CC3968 /* FlowLayout.swift in Sources */,
 				034CEA0D2EF7C7D1009B222E /* LabeledBar.swift in Sources */,
+				82838B592F02BA100042D94F /* PhotoGrid.swift in Sources */,
 				034CEA0F2EF7D0DD009B222E /* ButtonStack.swift in Sources */,
 				038BE8672EEBB32A00CC3968 /* CurrencyConverter.swift in Sources */,
 				82838B522EFCE4E70042D94F /* TreeDiagram.swift in Sources */,
