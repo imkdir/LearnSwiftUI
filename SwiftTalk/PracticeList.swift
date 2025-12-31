@@ -26,6 +26,7 @@ enum Practice: String, Identifiable, CaseIterable {
     case asyncTimeline
     case photoGrid
     case layoutInspector
+    case customComponent
     
     var id: Self {
         self
@@ -69,6 +70,8 @@ enum Practice: String, Identifiable, CaseIterable {
             "Photo Grid"
         case .layoutInspector:
             "Layout Inspector"
+        case .customComponent:
+            "Custom Component"
         }
     }
 }
@@ -119,6 +122,8 @@ struct PracticeList: View {
                     PhotoGrid()
                 case .layoutInspector:
                     LayoutInspector()
+                case .customComponent:
+                    CoffeeCart()
                 }
             }
         }
