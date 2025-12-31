@@ -25,6 +25,7 @@ enum Practice: String, Identifiable, CaseIterable {
     case treeDiagram
     case asyncTimeline
     case photoGrid
+    case layoutInspector
     
     var id: Self {
         self
@@ -66,6 +67,8 @@ enum Practice: String, Identifiable, CaseIterable {
             "Async Timeline"
         case .photoGrid:
             "Photo Grid"
+        case .layoutInspector:
+            "Layout Inspector"
         }
     }
 }
@@ -114,6 +117,8 @@ struct PracticeList: View {
                     StreamMap()
                 case .photoGrid:
                     PhotoGrid()
+                case .layoutInspector:
+                    LayoutInspector()
                 }
             }
         }

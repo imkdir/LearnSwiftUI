@@ -37,6 +37,7 @@
 		038BE8882EEFA18100CC3968 /* AnimationCurves.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8872EEFA17C00CC3968 /* AnimationCurves.swift */; };
 		038BE88A2EEFCF6B00CC3968 /* ShoppingCart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE8892EEFCF5F00CC3968 /* ShoppingCart.swift */; };
 		038BE88C2EF12ED900CC3968 /* Stopwatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038BE88B2EF12ED100CC3968 /* Stopwatch.swift */; };
+		826B42B22F04D29F002BC4B7 /* LayoutInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826B42B12F04D29A002BC4B7 /* LayoutInspector.swift */; };
 		82838B4C2EFA7E9C0042D94F /* MatchedGeometryEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4B2EFA7E930042D94F /* MatchedGeometryEffect.swift */; };
 		82838B4E2EFB52E80042D94F /* FinishedEpisodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4D2EFB52E80042D94F /* FinishedEpisodes.swift */; };
 		82838B502EFBC82F0042D94F /* LargeScrollingGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4F2EFBC8280042D94F /* LargeScrollingGraph.swift */; };
@@ -75,6 +76,7 @@
 		038BE8872EEFA17C00CC3968 /* AnimationCurves.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimationCurves.swift; sourceTree = "<group>"; };
 		038BE8892EEFCF5F00CC3968 /* ShoppingCart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingCart.swift; sourceTree = "<group>"; };
 		038BE88B2EF12ED100CC3968 /* Stopwatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stopwatch.swift; sourceTree = "<group>"; };
+		826B42B12F04D29A002BC4B7 /* LayoutInspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutInspector.swift; sourceTree = "<group>"; };
 		82838B4B2EFA7E930042D94F /* MatchedGeometryEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchedGeometryEffect.swift; sourceTree = "<group>"; };
 		82838B4D2EFB52E80042D94F /* FinishedEpisodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinishedEpisodes.swift; sourceTree = "<group>"; };
 		82838B4F2EFBC8280042D94F /* LargeScrollingGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeScrollingGraph.swift; sourceTree = "<group>"; };
@@ -142,6 +144,7 @@
 				82838B512EFCE4E00042D94F /* TreeDiagram.swift */,
 				82838B532EFE2D670042D94F /* AsyncTimeline.swift */,
 				82838B582F02BA0B0042D94F /* PhotoGrid.swift */,
+				826B42B12F04D29A002BC4B7 /* LayoutInspector.swift */,
 				038BE8832EEE8E0300CC3968 /* PracticeList.swift */,
 				038BE86D2EEBD39400CC3968 /* SwiftTalk */,
 			);
@@ -251,6 +254,7 @@
 				038BE8862EEF8D0900CC3968 /* ShakeIt.swift in Sources */,
 				038BE88C2EF12ED900CC3968 /* Stopwatch.swift in Sources */,
 				034CEA0B2EF79AA6009B222E /* Checkmark.swift in Sources */,
+				826B42B22F04D29F002BC4B7 /* LayoutInspector.swift in Sources */,
 				038BE8752EEBD97500CC3968 /* CollectionItem.swift in Sources */,
 				034CEA092EF63ED0009B222E /* Slides.swift in Sources */,
 				038BE8712EEBD42400CC3968 /* CollectionDetail.swift in Sources */,
