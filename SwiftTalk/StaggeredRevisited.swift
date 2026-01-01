@@ -108,6 +108,12 @@ private let icons: [String] = [
     "figure.seated.seatbelt"
 ]
 
+extension CGRect {
+    var distance: CGFloat {
+        sqrt(minX * minX + minY * minY)
+    }
+}
+
 struct StaggerItem: Identifiable, View {
     let id = UUID()
     let icon = icons.randomElement() ?? "figure.walk"
@@ -115,36 +121,61 @@ struct StaggerItem: Identifiable, View {
     
     @State private var displayIconName: Bool = false
     
-    struct NamespacesPreference: PreferenceKey {
-        static var defaultValue: [Namespace.ID] = []
+    struct Payload: Hashable, Comparable {
+        let namespace: Namespace.ID
+        let priority: Double
+        let anchor: CGRect
         
-        static func reduce(value: inout [Namespace.ID], nextValue: () -> [Namespace.ID]) {
+        static func <(lhs: Payload, rhs: Payload) -> Bool {
+            guard lhs.priority != rhs.priority else {
+                return lhs.anchor.distance < rhs.anchor.distance
+            }
+            return lhs.priority > rhs.priority
+        }
+    }
+    
+    struct PayloadPreference: PreferenceKey {
+        static var defaultValue: [Payload] = []
+        
+        static func reduce(value: inout [Payload], nextValue: () -> [Payload]) {
             value += nextValue()
         }
     }
     
     struct Parent: ViewModifier {
-        @State private var viewIDs: [Namespace.ID] = []
+        @State private var remainingPayloads: [Payload] = []
         @State private var viewedIDs: Set<Namespace.ID> = []
         
+        var sortedIDs: [Namespace.ID] {
+            remainingPayloads
+                .sorted()
+                .map({ $0.namespace })
+        }
+        
         var delays: [Namespace.ID: Double] {
-            Dictionary(uniqueKeysWithValues: viewIDs.enumerated().map({
-                ($1, Double($0) * 0.2)
-            }))
+            Dictionary(
+                uniqueKeysWithValues: sortedIDs
+                    .enumerated()
+                    .map({ ($1, Double($0) * 0.2) })
+            )
         }
         
         func body(content: Content) -> some View {
             content
                 .environment(\.colorfulDelays, delays)
-                .onPreferenceChange(NamespacesPreference.self) {
-                    self.viewIDs = $0.filter({ !viewedIDs.contains($0) })
-                    self.viewedIDs.formUnion(self.viewIDs)
+                .onPreferenceChange(PayloadPreference.self) {
+                    remainingPayloads = $0.filter({
+                        !viewedIDs.contains($0.namespace)
+                    })
+                    viewedIDs.formUnion(remainingPayloads.map({ $0.namespace }))
                 }
         }
     }
     
     struct Child<T: Transition>: ViewModifier {
         let transition: T
+        let priority: Double
+        
         @Namespace private var namespace
         @Environment(\.colorfulDelays) private var delays
         @State private var visible = false
@@ -156,7 +187,16 @@ struct StaggerItem: Identifiable, View {
         func body(content: Content) -> some View {
             transition
                 .apply(content: content, phase: visible ? .identity : .willAppear)
-                .preference(key: NamespacesPreference.self, value: [namespace])
+                .background {
+                    GeometryReader { proxy in
+                        Color.clear
+                            .preference(key: PayloadPreference.self, value: [.init(
+                                namespace: namespace,
+                                priority: priority,
+                                anchor: proxy.frame(in: .global)
+                            )])
+                    }
+                }
                 .onChange(of: delay) { _, newValue in
                     if let newValue {
                         withAnimation(.smooth.delay(newValue)) {
@@ -194,8 +234,8 @@ struct StaggerItem: Identifiable, View {
 }
 
 extension View {
-    func stagger<T: Transition>(_ transition: T) -> some View {
-        modifier(StaggerItem.Child(transition: transition))
+    func stagger<T: Transition>(_ transition: T, priority: Double = 0) -> some View {
+        modifier(StaggerItem.Child(transition: transition, priority: priority))
     }
 }
 
@@ -217,7 +257,10 @@ struct StaggeredRevisited: View {
         ScrollView {
             VStack {
                 bannder
-                    .stagger(.slide.combined(with: .opacity))
+                    .stagger(
+                        .slide.combined(with: .opacity),
+                        priority: -1
+                    )
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(items) {
                         $0.stagger(.scale)

@@ -28,6 +28,7 @@ enum Practice: String, Identifiable, CaseIterable {
     case layoutInspector
     case customComponent
     case staggeredAnimations
+    case staggeredFigures
     
     var id: Self {
         self
@@ -75,6 +76,8 @@ enum Practice: String, Identifiable, CaseIterable {
             "Custom Component"
         case .staggeredAnimations:
             "Staggered Animations"
+        case .staggeredFigures:
+            "Staggered Figures"
         }
     }
 }
@@ -129,6 +132,8 @@ struct PracticeList: View {
                     CoffeeCart()
                 case .staggeredAnimations:
                     StaggeredAnimations()
+                case .staggeredFigures:
+                    StaggeredRevisited()
                 }
             }
         }
