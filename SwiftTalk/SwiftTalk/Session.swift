@@ -49,21 +49,23 @@ class Session: NSObject, ObservableObject, ASWebAuthenticationPresentationContex
         authSession = ASWebAuthenticationSession(
             url: URL(string: authUrl)!,
             callback: .customScheme(authScheme)) { callback, error in
-                if let error {
-                    self.authError = .authenticationError(error)
-                    return
+                DispatchQueue.main.async {
+                    if let error {
+                        self.authError = .authenticationError(error)
+                        return
+                    }
+                    guard let callback else {
+                        self.authError = .unknownError
+                        return
+                    }
+                    guard let components = URLComponents(url: callback, resolvingAgainstBaseURL: false),
+                          let sessionId = components[query: "session_id"],
+                          let csrf = components[query: "csrf"] else {
+                        self.authError = .parsingError
+                        return
+                    }
+                    self.credentials = (sessionId, csrf)
                 }
-                guard let callback else {
-                    self.authError = .unknownError
-                    return
-                }
-                guard let components = URLComponents(url: callback, resolvingAgainstBaseURL: false),
-                      let sessionId = components[query: "session_id"],
-                      let csrf = components[query: "csrf"] else {
-                    self.authError = .parsingError
-                    return
-                }
-                self.credentials = (sessionId, csrf)
             }
         authSession?.presentationContextProvider = self
         authSession?.start()
