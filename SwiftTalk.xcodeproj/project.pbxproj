@@ -40,6 +40,7 @@
 		826B42B22F04D29F002BC4B7 /* LayoutInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826B42B12F04D29A002BC4B7 /* LayoutInspector.swift */; };
 		826B42B42F04FF22002BC4B7 /* CustomComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826B42B32F04FEF9002BC4B7 /* CustomComponent.swift */; };
 		826B42B62F05F3A6002BC4B7 /* iPhoneSimulatorChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826B42B52F05F391002BC4B7 /* iPhoneSimulatorChrome.swift */; };
+		826B42B82F063E85002BC4B7 /* StaggeredAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826B42B72F063E78002BC4B7 /* StaggeredAnimations.swift */; };
 		82838B4C2EFA7E9C0042D94F /* MatchedGeometryEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4B2EFA7E930042D94F /* MatchedGeometryEffect.swift */; };
 		82838B4E2EFB52E80042D94F /* FinishedEpisodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4D2EFB52E80042D94F /* FinishedEpisodes.swift */; };
 		82838B502EFBC82F0042D94F /* LargeScrollingGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4F2EFBC8280042D94F /* LargeScrollingGraph.swift */; };
@@ -81,6 +82,7 @@
 		826B42B12F04D29A002BC4B7 /* LayoutInspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutInspector.swift; sourceTree = "<group>"; };
 		826B42B32F04FEF9002BC4B7 /* CustomComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomComponent.swift; sourceTree = "<group>"; };
 		826B42B52F05F391002BC4B7 /* iPhoneSimulatorChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPhoneSimulatorChrome.swift; sourceTree = "<group>"; };
+		826B42B72F063E78002BC4B7 /* StaggeredAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaggeredAnimations.swift; sourceTree = "<group>"; };
 		82838B4B2EFA7E930042D94F /* MatchedGeometryEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchedGeometryEffect.swift; sourceTree = "<group>"; };
 		82838B4D2EFB52E80042D94F /* FinishedEpisodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinishedEpisodes.swift; sourceTree = "<group>"; };
 		82838B4F2EFBC8280042D94F /* LargeScrollingGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeScrollingGraph.swift; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 				826B42B12F04D29A002BC4B7 /* LayoutInspector.swift */,
 				826B42B32F04FEF9002BC4B7 /* CustomComponent.swift */,
 				826B42B52F05F391002BC4B7 /* iPhoneSimulatorChrome.swift */,
+				826B42B72F063E78002BC4B7 /* StaggeredAnimations.swift */,
 				038BE8832EEE8E0300CC3968 /* PracticeList.swift */,
 				038BE86D2EEBD39400CC3968 /* SwiftTalk */,
 			);
@@ -272,6 +275,7 @@
 				034CEA112EF8B65A009B222E /* Magnification.swift in Sources */,
 				038BE8792EEC141B00CC3968 /* Session.swift in Sources */,
 				82838B502EFBC82F0042D94F /* LargeScrollingGraph.swift in Sources */,
+				826B42B82F063E85002BC4B7 /* StaggeredAnimations.swift in Sources */,
 				038BE8822EEE8AFA00CC3968 /* FlowLayout.swift in Sources */,
 				034CEA0D2EF7C7D1009B222E /* LabeledBar.swift in Sources */,
 				82838B592F02BA100042D94F /* PhotoGrid.swift in Sources */,

@@ -27,6 +27,7 @@ enum Practice: String, Identifiable, CaseIterable {
     case photoGrid
     case layoutInspector
     case customComponent
+    case staggeredAnimations
     
     var id: Self {
         self
@@ -72,6 +73,8 @@ enum Practice: String, Identifiable, CaseIterable {
             "Layout Inspector"
         case .customComponent:
             "Custom Component"
+        case .staggeredAnimations:
+            "Staggered Animations"
         }
     }
 }
@@ -80,7 +83,7 @@ struct PracticeList: View {
     
     var body: some View {
         NavigationStack {
-            List(Practice.allCases) {
+            List(Practice.allCases.reversed()) {
                 NavigationLink($0.title, value: $0)
             }
             .navigationTitle("Practices")
@@ -124,6 +127,8 @@ struct PracticeList: View {
                     LayoutInspector()
                 case .customComponent:
                     CoffeeCart()
+                case .staggeredAnimations:
+                    StaggeredAnimations()
                 }
             }
         }
