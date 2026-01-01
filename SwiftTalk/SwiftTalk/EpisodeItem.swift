@@ -40,8 +40,13 @@ struct EpisodeItem: View {
                                     : nil
                                 }
                         } placeholder: {
+                            #if os(iOS)
                             Color(uiColor: .tertiarySystemFill)
                                 .frame(width: 131)
+                            #else
+                            Color.gray
+                                .frame(width: 131)
+                            #endif
                         }
                         .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                         VStack(alignment: .leading, spacing: 0) {

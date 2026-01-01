@@ -108,7 +108,9 @@ struct AnimationCurves: View {
                         .tag($0)
                 }
             }
+            #if os(iOS)
             .pickerStyle(.wheel)
+            #endif
         }.padding()
     }
 }

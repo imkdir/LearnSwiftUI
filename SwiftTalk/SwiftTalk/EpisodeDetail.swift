@@ -228,13 +228,17 @@ struct CollectionCard: View {
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fit)
+                #if os(iOS)
                     .background(Color(uiColor: .systemBackground))
+                #else
+                    .background(Color(nsColor: .windowBackgroundColor))
+                #endif
                     .clipShape(RoundedRectangle(
                         cornerSize: .init(width: 12, height: 12),
                         style: .continuous
                     ))
                     .shadow(
-                        color: Color(uiColor: .init(white: 0, alpha: 0.1)),
+                        color: Color.black.opacity(0.1),
                         radius: 8
                     )
                     .overlay(alignment: .bottomLeading) {
@@ -244,13 +248,17 @@ struct CollectionCard: View {
                             .minimumScaleFactor(0.8)
                             .lineLimit(nil)
                             .padding()
-                            .background(Color(uiColor: .systemBackground.withAlphaComponent(0.8)))
+                            .background(.background.opacity(0.8))
                             .border(.secondary)
                             .padding()
                     }
             }
         } placeholder: {
+            #if os(iOS)
             Color(uiColor: .tertiarySystemBackground)
+            #else
+            Color(nsColor: .underPageBackgroundColor)
+            #endif
         }
     }
 }

@@ -242,7 +242,9 @@ struct MatchedGeometryEffectDemo: View {
                         }
                     }
                     .padding()
+                    #if os(iOS)
                     .background(RoundedRectangle(cornerRadius: 12).fill(Color(uiColor: .secondarySystemBackground)))
+                    #endif
                     VStack {
                         Text("Target")
                             .font(.subheadline)
@@ -256,7 +258,9 @@ struct MatchedGeometryEffectDemo: View {
                         }
                     }
                     .padding()
+                    #if os(iOS)
                     .background(RoundedRectangle(cornerRadius: 12).fill(Color(uiColor: .secondarySystemBackground)))
+                    #endif
                 }
                 .padding(.vertical)
             }

@@ -55,7 +55,9 @@ extension CurrencyConverter: View {
         VStack {
             HStack {
                 TextField("input", text: $input)
+                    #if os(iOS)
                     .keyboardType(.decimalPad)
+                    #endif
                     .multilineTextAlignment(.trailing)
                     .textFieldStyle(.roundedBorder)
                     .fixedSize()
@@ -72,7 +74,11 @@ extension CurrencyConverter: View {
             Button("Refresh") {
                 resource.reload()
             }
+            #if os(visionOS)
             .buttonStyle(.glassProminent)
+            #else
+            .buttonStyle(.borderedProminent)
+            #endif
         }
     }
 }

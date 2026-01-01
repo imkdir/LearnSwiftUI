@@ -10,6 +10,11 @@ import Observation
 import KeychainItem
 import AuthenticationServices
 import Combine
+#if os(macOS)
+import AppKit
+#else
+import UIKit
+#endif
 
 class Session: NSObject, ObservableObject, ASWebAuthenticationPresentationContextProviding {
 
@@ -17,12 +22,24 @@ class Session: NSObject, ObservableObject, ASWebAuthenticationPresentationContex
     @KeychainItem(account: "csrf") private var csrf
     
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        #if os(macOS)
+        // On macOS, the presentation anchor is an NSWindow.
+        // We'll find the key window, or fall back to the first available window.
+        guard let window = NSApplication.shared.windows.first(where: { $0.isKeyWindow }) ?? NSApplication.shared.windows.first else {
+            // If there are no windows, we cannot present the auth session.
+            // This is a programmer error, so we'll crash.
+            fatalError("No window available to present the authentication session.")
+        }
+        return window
+        #else
+        // This code will run on iOS, iPadOS, visionOS, and Mac Catalyst
         guard let windowScene = UIApplication.shared
             .connectedScenes
             .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else {
                 fatalError()
             }
         return windowScene.windows.first ?? ASPresentationAnchor(windowScene: windowScene)
+        #endif
     }
     
     @Published

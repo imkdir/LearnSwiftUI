@@ -22,7 +22,7 @@ struct Lap: Equatable {
         
         var color: Color {
             switch self {
-            case .regular:  .init(uiColor: .label)
+            case .regular:  .primary
             case .shortest: .green
             case .longest:  .red
             }
@@ -349,7 +349,9 @@ struct StopwatchPage: View {
                     .tag(style)
             }
         }
+        #if os(iOS)
         .tabViewStyle(.page)
+        #endif
         .overlay(alignment: .bottom) {
             actionStack
         }

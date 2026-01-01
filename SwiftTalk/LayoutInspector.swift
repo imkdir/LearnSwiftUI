@@ -31,7 +31,7 @@ final class Console {
                 if sender {
                     HStack {
                         Spacer()
-                        Text("\(Text("@\(label)").fontWeight(.semibold)) \(Text(value))")
+                        Text("@**\(label)** \(value)")
                             .foregroundStyle(.white)
                             .padding(.init(horizontal: 8, vertical: 6))
                             .background {
@@ -50,7 +50,7 @@ final class Console {
                                 .padding(.init(horizontal: 8, vertical: 6))
                                 .background {
                                     Capsule(style: .continuous)
-                                        .fill(Color(uiColor: .systemGray5))
+                                        .fill(Color.gray.opacity(0.2))
                                 }
                         }
                         Spacer()

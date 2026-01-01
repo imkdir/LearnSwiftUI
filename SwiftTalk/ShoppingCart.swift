@@ -105,7 +105,7 @@ struct ShoppingCart: View {
             .scrollClipDisabled()
             .zIndex(1)
             .padding(20)
-            .background(isHoveringOverCart ? Color(uiColor: .secondarySystemBackground) : nil)
+            .background(isHoveringOverCart ? Color.gray : nil)
             .onGeometryChange(for: CGRect.self) { proxy in
                 proxy.frame(in: .named("PageSpace"))
             } action: { newValue in

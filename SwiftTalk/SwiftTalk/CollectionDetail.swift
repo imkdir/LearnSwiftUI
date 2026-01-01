@@ -32,7 +32,7 @@ struct CollectionDetail: View {
                     .font(.largeTitle)
                     .lineLimit(2)
                     .padding()
-                    .background(Color(uiColor: .systemBackground.withAlphaComponent(0.8)))
+                    .background(.background.opacity(0.8))
                     .border(.secondary)
                 Text(collection.description)
                     .lineLimit(nil)
@@ -47,7 +47,11 @@ struct CollectionDetail: View {
                     }
                 }
                 .padding()
-                .background(Color(uiColor: .systemGroupedBackground))
+#if os(iOS)
+                .background(
+                    Color(uiColor: .systemGroupedBackground)
+                )
+#endif
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .opacity(episodes.isEmpty ? 0 : 1)
                 .animation(.easeInOut, value: episodes.isEmpty)

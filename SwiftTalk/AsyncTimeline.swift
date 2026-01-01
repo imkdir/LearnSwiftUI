@@ -224,7 +224,7 @@ extension Event {
         .init(
             id: .combined(lhs.id, rhs.id),
             time: 0,
-            color: .init(uiColor: .magenta),
+            color: .purple,
             value: .combined(lhs.value, rhs.value)
         )
     }
@@ -269,7 +269,9 @@ struct UniqueStream: Equatable, Identifiable {
 }
 
 struct StreamMap: View {
+    #if os(iOS)
     @State private var editMode: EditMode = .inactive
+    #endif
     @State private var streams: [UniqueStream] = [
         .input2, .input1
     ].map(UniqueStream.init)
@@ -302,6 +304,7 @@ struct StreamMap: View {
                 list
                 actionStack
             }
+            #if os(iOS)
             .environment(\.editMode, $editMode)
             .onChange(of: selection) { oldValue, newValue in
                 if oldValue.isEmpty {
@@ -311,6 +314,7 @@ struct StreamMap: View {
                     }
                 }
             }
+            #endif
         }
     }
     
@@ -349,7 +353,9 @@ struct StreamMap: View {
     
     func add(_ stream: Stream) {
         streams.insert(.init(stream), at: 0)
+        #if os(iOS)
         editMode = .inactive
+        #endif
     }
     
     var actionStack: some View {
@@ -371,6 +377,7 @@ struct StreamMap: View {
                 Button { add(.zipped(lhs, rhs)) } label: { Text("zip") }
                 Button { add(.combinedLatest(lhs, rhs)) } label: { Text("combineLatest") }
             }
+            #if os(iOS)
             if editMode == .active || !selection.isEmpty {
                 Button {
                     selection.removeAll()
@@ -380,8 +387,11 @@ struct StreamMap: View {
                 }
                 .buttonStyle(.glass)
             }
+            #endif
         }
+        #if os(iOS)
         .buttonStyle(.glassProminent)
+        #endif
     }
 }
 

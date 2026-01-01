@@ -164,7 +164,11 @@ struct CapsuleStepper: View {
                     font = .body
                 }
             }
+            #if os(iOS)
             .background(Color(uiColor: .systemGray6))
+            #else
+            .background(Color.accentColor)
+            #endif
             .clipShape(Capsule())
         }
     }
@@ -268,7 +272,9 @@ struct MacintoshStepper: View {
                 }
             }
             .padding(.init(horizontal: 8, vertical: 4))
+            #if os(iOS)
             .background(Color(uiColor: .systemGray6))
+            #endif
             .overlay {
                 VStack(spacing: 0) {
                     Color.clear
