@@ -42,6 +42,7 @@
 		826B42B62F05F3A6002BC4B7 /* iPhoneSimulatorChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826B42B52F05F391002BC4B7 /* iPhoneSimulatorChrome.swift */; };
 		826B42B82F063E85002BC4B7 /* StaggeredAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826B42B72F063E78002BC4B7 /* StaggeredAnimations.swift */; };
 		826B42BA2F065E90002BC4B7 /* StaggeredRevisited.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826B42B92F065E7D002BC4B7 /* StaggeredRevisited.swift */; };
+		826B42BC2F074414002BC4B7 /* StickyHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826B42BB2F074409002BC4B7 /* StickyHeader.swift */; };
 		82838B4C2EFA7E9C0042D94F /* MatchedGeometryEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4B2EFA7E930042D94F /* MatchedGeometryEffect.swift */; };
 		82838B4E2EFB52E80042D94F /* FinishedEpisodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4D2EFB52E80042D94F /* FinishedEpisodes.swift */; };
 		82838B502EFBC82F0042D94F /* LargeScrollingGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82838B4F2EFBC8280042D94F /* LargeScrollingGraph.swift */; };
@@ -85,6 +86,7 @@
 		826B42B52F05F391002BC4B7 /* iPhoneSimulatorChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPhoneSimulatorChrome.swift; sourceTree = "<group>"; };
 		826B42B72F063E78002BC4B7 /* StaggeredAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaggeredAnimations.swift; sourceTree = "<group>"; };
 		826B42B92F065E7D002BC4B7 /* StaggeredRevisited.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaggeredRevisited.swift; sourceTree = "<group>"; };
+		826B42BB2F074409002BC4B7 /* StickyHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyHeader.swift; sourceTree = "<group>"; };
 		82838B4B2EFA7E930042D94F /* MatchedGeometryEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchedGeometryEffect.swift; sourceTree = "<group>"; };
 		82838B4D2EFB52E80042D94F /* FinishedEpisodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinishedEpisodes.swift; sourceTree = "<group>"; };
 		82838B4F2EFBC8280042D94F /* LargeScrollingGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeScrollingGraph.swift; sourceTree = "<group>"; };
@@ -157,6 +159,7 @@
 				826B42B52F05F391002BC4B7 /* iPhoneSimulatorChrome.swift */,
 				826B42B72F063E78002BC4B7 /* StaggeredAnimations.swift */,
 				826B42B92F065E7D002BC4B7 /* StaggeredRevisited.swift */,
+				826B42BB2F074409002BC4B7 /* StickyHeader.swift */,
 				038BE8832EEE8E0300CC3968 /* PracticeList.swift */,
 				038BE86D2EEBD39400CC3968 /* SwiftTalk */,
 			);
@@ -289,6 +292,7 @@
 				826B42B62F05F3A6002BC4B7 /* iPhoneSimulatorChrome.swift in Sources */,
 				038BE8732EEBD45E00CC3968 /* EpisodeItem.swift in Sources */,
 				038BE8772EEBDA1900CC3968 /* EpisodeDetail.swift in Sources */,
+				826B42BC2F074414002BC4B7 /* StickyHeader.swift in Sources */,
 				82838B4E2EFB52E80042D94F /* FinishedEpisodes.swift in Sources */,
 				038BE8842EEE8E0300CC3968 /* PracticeList.swift in Sources */,
 				038BE8802EEE3BC700CC3968 /* TravlerEffect.swift in Sources */,
