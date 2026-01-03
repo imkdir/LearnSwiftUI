@@ -7,118 +7,120 @@
 
 import SwiftUI
 
-struct FlowLayoutSizePreferenceKey: PreferenceKey {
-    static var defaultValue: [CGSize] = []
+struct FlowLayout: Layout {
+    let alignment: VerticalAlignment
     
-    static func reduce(value: inout [CGSize], nextValue: () -> [CGSize]) {
-        value += nextValue()
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let containerWidth = proposal
+            .replacingUnspecifiedDimensions().width
+        let dimensions = subviews
+            .map({ $0.dimensions(in: .unspecified) })
+        
+        let (_, size) = layout(
+            dimensions: dimensions,
+            containerWidth: containerWidth,
+            alignment: alignment
+        )
+        
+        return size
     }
-}
-
-func layout(sizes: [CGSize], spacing: CGSize = .init(width: 10, height: 10)) -> [CGPoint] {
-    var currentPoint: CGPoint = .zero
-    var result: [CGPoint] = []
-    for size in sizes {
-        result.append(currentPoint)
-        currentPoint.x += size.width + spacing.width
-    }
-    return result
-}
-
-func layout(sizes: [CGSize], spacing: CGSize = .init(width: 10, height: 10), containerWidth: CGFloat) -> [CGPoint] {
-    var currentPoint: CGPoint = .zero
-    var result: [CGPoint] = []
-    var lineHeight: CGFloat = 0
     
-    for size in sizes {
-        if currentPoint.x + size.width > containerWidth {
-            currentPoint.x = 0
-            currentPoint.y += lineHeight + spacing.height
-            lineHeight = 0
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        
+        let dimensions = subviews
+            .map({ $0.dimensions(in: .unspecified) })
+        
+        let (offsets, _) = layout(
+            dimensions: dimensions,
+            containerWidth: bounds.width,
+            alignment: alignment
+        )
+        
+        zip(subviews, offsets).forEach { subview, offset in
+            subview.place(at: offset, proposal: proposal)
         }
-        result.append(currentPoint)
-        currentPoint.x += size.width + spacing.width
-        lineHeight = max(lineHeight, size.height)
     }
-    return result
 }
 
-struct FlowLayout<Element: Identifiable, Cell: View>: View {
-    var items: [Element]
-    var cell: (Element) -> Cell
+private func layout(dimensions: [ViewDimensions], spacing: CGSize = .init(width: 10, height: 10), containerWidth: CGFloat, alignment: VerticalAlignment) -> (offsets: [CGPoint], containerSize: CGSize) {
+    var result: [CGRect] = []
+    var currentPosition: CGPoint = .zero
+    var currentLine: [CGRect] = []
     
-    /* Note:
-     In the previous version of this project, we also stored the IDs of items along with their sizes. It's undocumented, but the aggregated sizes seem to always be in the same order as the cells, so we can look up each cell's size by its index, and we don't need its ID.
-     */
-    @State private var sizes: [CGSize] = []
+    func flushLine() {
+        currentPosition.x = 0
+        let union = currentLine.union
+        result += currentLine.map({ rect in
+            var copy = rect
+            copy.origin.y += currentPosition.y - union.minY
+            return copy
+        })
+        currentPosition.y += union.height + spacing.height
+        currentLine.removeAll()
+    }
     
-    @State private var containerWidth: CGFloat = 0
+    for dim in dimensions {
+        if currentPosition.x + dim.width > containerWidth {
+            flushLine()
+        }
+        currentLine.append(.init(x: currentPosition.x, y: -dim[alignment], width: dim.width, height: dim.height))
+        currentPosition.x += dim.width + spacing.width
+    }
+    
+    flushLine()
+    
+    return (result.map({ $0.origin }), result.union.size)
+}
+
+extension Sequence where Element == CGRect {
+    var union: CGRect {
+        reduce(.null, { $0.union($1) })
+    }
+}
+
+enum Align: String, Identifiable, CaseIterable, View {
+    case top, center, bottom, firstTextBaseline, lastTextBaseline
+    
+    var id: Self { self }
+    
+    var icon: String {
+        switch self {
+        case .top:
+            "align.vertical.top"
+        case .center:
+            "align.vertical.center"
+        case .bottom:
+            "align.vertical.bottom"
+        case .firstTextBaseline:
+            "text.line.first.and.arrowtriangle.forward"
+        case .lastTextBaseline:
+            "text.line.last.and.arrowtriangle.forward"
+        }
+    }
     
     var body: some View {
-        let laidout = layout(sizes: sizes, containerWidth: containerWidth)
-        
-        VStack(spacing: 0) {
-            GeometryReader { proxy in
-                Color.clear.preference(key: FlowLayoutSizePreferenceKey.self, value: [proxy.size])
-            }
-            .onPreferenceChange(FlowLayoutSizePreferenceKey.self) {
-                self.containerWidth = $0[0].width
-            }
-            .frame(height: 0)
-            ZStack(alignment: .topLeading) {
-                ForEach(Array(zip(items, items.indices)), id: \.0.id) { (item, index) in
-                    cell(item)
-                        .fixedSize()
-                        .background {
-                            GeometryReader { proxy in
-                                Color.clear.preference(key: FlowLayoutSizePreferenceKey.self, value: [proxy.size])
-                            }
-                        }
-                    /*
-                     Before, we rendered each item at a calculated offset. But by using alignment guides instead of offsets, we let the layout system place the items, allowing the ZStack to automatically grow with its contents
-                     */
-                        .alignmentGuide(.leading) { dimension in
-                            guard !laidout.isEmpty else { return 0 }
-                            return -laidout[index].x
-                        }
-                        .alignmentGuide(.top) { dimension in
-                            guard !laidout.isEmpty else { return 0 }
-                            return -laidout[index].y
-                        }
-                }
-            }
-            .onPreferenceChange(FlowLayoutSizePreferenceKey.self) { value in
-                self.sizes = value
-            }
-            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+        HStack {
+            Image(systemName: icon)
+            Text(rawValue)
+        }
+    }
+    
+    var alignment: VerticalAlignment {
+        switch self {
+        case .top: .top
+        case .center: .center
+        case .bottom: .bottom
+        case .firstTextBaseline: .firstTextBaseline
+        case .lastTextBaseline: .lastTextBaseline
         }
     }
 }
 
-struct Item: Identifiable, Hashable {
-    let id = UUID()
-    let value: String
-}
-
-private let quotes = [
-    "Three may keep a secret, if two of them are dead.",
-    "Early to bed and early to rise, makes a man healthy, wealthy and wise.",
-    "Fish and visitors stink in three days.",
-    "God helps them that help themselves.",
-    "Lost time is never found again.",
-    "He that lies down with dogs, shall rise up with fleas.",
-    "Love your enemies, for they tell you your faults.",
-    "There are no gains without pains.",
-    "Well done is better than well said.",
-    "Haste makes waste."
-]
-
 struct FlowLayoutPlayground: View {
-    let items: [Item] = quotes
-        .flatMap({ $0.components(separatedBy: " ")})
-        .map(Item.init(value:))
+    let items: [Item] = quotes.map(Item.init(value:))
     
-    @State var spacing: CGFloat = 0
+    @State private var spacing: CGFloat = 0
+    @State private var align: Align = .top
     
     var body: some View {
         VStack(spacing: 30) {
@@ -132,16 +134,16 @@ struct FlowLayoutPlayground: View {
                             .opacity((spacing-20)/50.0)
                     }
                 ScrollView {
-                    FlowLayout(items: items) { item in
-                        Text(item.value)
-                            .foregroundStyle(.white)
-                            .padding(6)
-                            .background(RoundedRectangle(cornerRadius: 5).fill(.blue))
+                    FlowLayout(alignment: align.alignment) {
+                        ForEach(items) {
+                            $0
+                        }
                     }
-                    .border(.secondary)
-                }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .animation(.default, value: align)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            
+
             Text("Adjust Spacing to Trigger Layout")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -150,9 +152,55 @@ struct FlowLayoutPlayground: View {
                 .padding(.horizontal, 60)
         }
         .padding()
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Picker("Picker", selection: $align) {
+                        ForEach(Align.allCases) {
+                            $0
+                        }
+                    }
+                } label: {
+                    Image(systemName: align.icon)
+                        .font(.footnote)
+                }
+            }
+        }
     }
 }
 
+struct Item: Identifiable, View {
+    let id = UUID()
+    let value: String
+    let top = Int.random(in: 4...16)
+    let bottom = Int.random(in: 4...16)
+    
+    var contentInset: EdgeInsets {
+        .init(
+            top: CGFloat(top),
+            leading: 6,
+            bottom: CGFloat(bottom),
+            trailing: 6
+        )
+    }
+    
+    var body: some View {
+        Text(value)
+            .foregroundStyle(.white)
+            .padding(contentInset)
+            .background(RoundedRectangle(cornerRadius: 6).fill(.blue))
+    }
+}
+
+private let quotes = [
+    "Three may keep a secret", "if", "two", "of", "them", "are", "dead.",
+    "Fish and visitors", "stink", "in three days.",
+    "There are no gains \nwithout pains.",
+    "Haste", "makes", "waste"
+]
+
 #Preview {
-    FlowLayoutPlayground()
+    NavigationStack {
+        FlowLayoutPlayground()
+    }
 }
