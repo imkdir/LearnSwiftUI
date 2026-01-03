@@ -108,6 +108,86 @@ private let icons: [String] = [
     "figure.seated.seatbelt"
 ]
 
+private let natureIcons: [String] = [
+    // MARK: - Weather Conditions
+    "sun.min",
+    "sun.max",
+    "sun.haze",
+    "sun.dust",
+    "moon",
+    "moon.stars",
+    "cloud",
+    "cloud.drizzle",
+    "cloud.rain",
+    "cloud.heavyrain",
+    "cloud.fog",
+    "cloud.hail",
+    "cloud.snow",
+    "cloud.sleet",
+    "cloud.bolt",
+    "cloud.bolt.rain",
+    "cloud.sun",
+    "cloud.sun.rain",
+    "cloud.sun.bolt",
+    "cloud.moon",
+    "cloud.moon.rain",
+    "cloud.moon.bolt",
+    
+    // MARK: - Extreme Weather & Temperature
+    "wind",
+    "wind.snow",
+    "tornado",
+    "hurricane",
+    "snowflake",
+    "thermometer",
+    "thermometer.sun",
+    "thermometer.snowflake",
+    "thermometer.low",
+    "thermometer.medium",
+    "thermometer.high",
+    
+    // MARK: - Elements (Fire, Water, Electric)
+    "flame",
+    "drop",
+    "drop.degreesign",
+    "drop.triangle",
+    "water.waves",
+    "water.waves.and.arrow.up",
+    "water.waves.and.arrow.down",
+    "bolt",
+    "bolt.horizontal",
+    
+    // MARK: - Celestial & Space
+    "sparkles",
+    "star",
+    "globe.americas",
+    "globe.europe.africa",
+    "globe.asia.australia",
+    
+    // MARK: - Flora (Plants)
+    "leaf",
+    "leaf.arrow.triangle.circlepath", // "circlepath" contains "circle", removing per request?
+    // "leaf.arrow.triangle.circlepath" contains "circle", removing.
+    "laurel.leading",
+    "laurel.trailing",
+    "tree",
+    
+    // MARK: - Fauna (Animals)
+    "ant",
+    "ladybug",
+    "tortoise",
+    "hare",
+    "lizard",
+    "bird",
+    "fish",
+    "pawprint",
+    "teddybear", // Included as it's often grouped here, though a toy
+    
+    // MARK: - Landscape
+    "mountain.2",
+    "tent"
+]
+
 extension CGRect {
     var distance: CGFloat {
         sqrt(minX * minX + minY * minY)
@@ -116,8 +196,12 @@ extension CGRect {
 
 struct StaggerItem: Identifiable, View {
     let id = UUID()
-    let icon = icons.randomElement() ?? "figure.walk"
+    let icon: String
     let color = colors.randomElement() ?? .black
+    
+    init(nature: Bool = false) {
+        icon = (nature ? natureIcons : icons).randomElement() ?? ""
+    }
     
     @State private var displayIconName: Bool = false
     

@@ -8,117 +8,289 @@
 import SwiftUI
 
 extension EnvironmentValues {
-    @Entry var stickyFrames: [Namespace.ID: CGRect]?
+    @Entry var stickyFrames: Sticky.IdentifiedFrames.Value?
 }
 
-struct StickyFramePreference: PreferenceKey {
-    typealias Value = [Namespace.ID: CGRect]
-    static var defaultValue: Value = [:]
+struct Sticky {
     
-    static func reduce(value: inout Value, nextValue: () -> Value) {
-        value.merge(nextValue()) { $1 }
+    static let coordinateSpace: NamedCoordinateSpace = .named("Sticky")
+    
+    struct IdentifiedFrames: PreferenceKey {
+        typealias Value = [Namespace.ID: CGRect]
+        static var defaultValue: Value = [:]
+        
+        static func reduce(value: inout Value, nextValue: () -> Value) {
+            value.merge(nextValue()) { $1 }
+        }
     }
-}
 
-struct Sticky: ViewModifier {
-    let namespace: String
-    
-    @Namespace private var id
-    @State private var frame: CGRect = .zero
-    @Environment(\.stickyFrames) private var frames
-    
-    var pushingFrame: CGRect? {
-        guard let frames else {
-            print("Warning: Using .sticky(namespace:) without .stickyHeaders()")
-            return nil
-        }
-        return frames
-            .filter({ $0.key != id })
-            .values
-            .first(where: {
-                frame.minY < $0.minY && $0.minY < frame.height
-            })
+    enum Role {
+        case container, element
     }
     
-    private var offsetY: CGFloat {
-        guard frame.minY < 0 else { return 0 }
-        var offsetY = -frame.minY
-        if let pushingFrame {
-            offsetY -= frame.height - pushingFrame.minY
-        }
-        return offsetY
-    }
-    
-    func body(content: Content) -> some View {
-        content
-            .offset(y: offsetY)
-            .zIndex(offsetY > 0 ? .infinity : 0)
-            .background {
-                Color.clear
-                    .onGeometryChange(for: CGRect.self) {
-                        $0.frame(in: .named(namespace))
-                    } action: {
-                        frame = $0
-                    }
+    struct Element: ViewModifier {
+        @Namespace private var id
+        @State private var frame: CGRect = .zero
+        @Environment(\.stickyFrames) private var frames
+        
+        private var pushingFrame: CGRect? {
+            guard let frames else {
+                print("Warning: Using .sticky() without .sticky(role: .container)")
+                return nil
             }
-            .preference(key: StickyFramePreference.self, value: [id: frame])
+            return frames
+                .filter({ $0.key != id })
+                .values
+                .first(where: {
+                    frame.minY < $0.minY && $0.minY < frame.height
+                })
+        }
+        
+        private var offsetY: CGFloat {
+            guard frame.minY < 0 else { return 0 }
+            var offsetY = -frame.minY
+            if let pushingFrame {
+                offsetY -= frame.height - pushingFrame.minY
+            }
+            return offsetY
+        }
+        
+        func body(content: Content) -> some View {
+            content
+                .offset(y: offsetY)
+                .zIndex(offsetY > 0 ? .infinity : 0)
+                .background {
+                    Color.clear
+                        .onGeometryChange(for: CGRect.self) {
+                            $0.frame(in: Sticky.coordinateSpace)
+                        } action: {
+                            frame = $0
+                        }
+                }
+                .preference(key: IdentifiedFrames.self, value: [id: frame])
+        }
     }
     
+    struct Container: ViewModifier {
+        @State private var frames: [Namespace.ID: CGRect] = [:]
+        
+        func body(content: Content) -> some View {
+            content
+                .environment(\.stickyFrames, frames)
+                .onPreferenceChange(IdentifiedFrames.self) {
+                    frames = $0
+                }
+                .coordinateSpace(Sticky.coordinateSpace)
+        }
+    }
+}
+
+
+extension View {
+    func sticky(role: Sticky.Role = .element) -> some View {
+        Group {
+            switch role {
+            case .container:
+                modifier(Sticky.Container())
+            case .element:
+                modifier(Sticky.Element())
+            }
+        }
+    }
 }
 
 extension View {
-    func sticky(in namespace: String) -> some View {
-        modifier(Sticky(namespace: namespace))
+    func measureFrame<T: Equatable>(_ keyPath: KeyPath<CGRect, T>, in coordinateSpace: NamedCoordinateSpace, perform: @escaping (T) -> Void) -> some View {
+        background {
+            Color.clear
+                .onGeometryChange(
+                    for: T.self,
+                    of: { $0.frame(in: coordinateSpace)[keyPath: keyPath] },
+                    action: perform
+                )
+        }
     }
 }
 
-struct StickyContainer: ViewModifier {
-    @State private var frames: [Namespace.ID: CGRect] = [:]
+struct StickyTabScrollView<Tab: Hashable & Comparable & View, Header: View, Picker: View, Content: View>: View {
+    let currentTab: Tab
+    @ViewBuilder var header: Header
+    @ViewBuilder var picker: Picker
+    @ViewBuilder var content: Content
     
-    func body(content: Content) -> some View {
-        content
-            .environment(\.stickyFrames, frames)
-            .onPreferenceChange(StickyFramePreference.self) {
-                frames = $0
-            }
+    @State private var scrollOffset: [Tab: CGFloat] = [:]
+    @State private var scrollTargetOffset: CGFloat = 0
+    @State private var pickerFrameMinY: [String: CGFloat] = [:]
+    
+    struct Constants {
+        static var scrollTarget: String { #function }
+        static var outsideScrollView: String { #function }
+        static var inScrollView: String { #function }
     }
-}
-
-extension View {
-    func stickyHeaders() -> some View {
-        modifier(StickyContainer())
-    }
-}
-
-
-struct StickyHeaderDemo: View {
-    private let namespace = "demo"
     
     var body: some View {
-        ScrollView {
-            Image(systemName: "globe")
-                .font(.largeTitle)
-                .foregroundStyle(.tint)
-                .padding()
-            
-            ForEach(0..<20) { idx in
-                Text("Header \(idx)")
-                    .fontWeight(.semibold)
-                    .font(.title)
-                    .padding(4)
-                    .frame(maxWidth: .infinity)
-                    .background(.white)
-                    .sticky(in: namespace)
-                Text(loremipsum)
-                    .padding()
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack {
+                    header
+                    
+                    picker
+                        .measureFrame(\.minY, in: .named(Constants.outsideScrollView)) {
+                            pickerFrameMinY[Constants.outsideScrollView] = $0
+                        }
+                        .sticky() // ↑ sticky area, ↓ non-sticky area
+                        .measureFrame(\.minY, in: .named(Constants.inScrollView)) {
+                            pickerFrameMinY[Constants.inScrollView] = $0
+                        }
+                    
+                    content
+                }
+                .measureFrame(\.minY, in: .named(Constants.outsideScrollView)) {
+                    scrollOffset[currentTab] = $0
+                }
+                .coordinateSpace(.named(Constants.inScrollView))
+                .overlay(alignment: .top) {
+                    Color.clear
+                        .frame(height: 0)
+                        .id(Constants.scrollTarget)
+                        .offset(y: scrollTargetOffset)
+                }
+            }
+            .onChange(of: currentTab) { oldValue, _ in
+                restoreScrollPosition(proxy, previousTab: oldValue)
             }
         }
-        .coordinateSpace(.named(namespace))
-        .stickyHeaders()
+        .sticky(role: .container)
+        .coordinateSpace(.named(Constants.outsideScrollView))
+        .overlay(alignment: .bottom) {
+            debugger
+        }
+    }
+    
+    private func restoreScrollPosition(_ proxy: ScrollViewProxy, previousTab: Tab) {
+        if pickerFrameMinY[Constants.outsideScrollView, default: 0] <= 0 {
+            scrollTargetOffset = max(
+                scrollOffset[currentTab].map({ -$0 }) ?? 0,
+                pickerFrameMinY[Constants.inScrollView, default: 0]
+            )
+            proxy.scrollTo(Constants.scrollTarget, anchor: .top)
+        } else {
+            scrollOffset[currentTab] = scrollOffset[previousTab, default: 0]
+        }
+    }
+    
+    struct DebugInfo<Key: Hashable & Comparable, Value, RowContent: View>: View {
+        let name: String
+        let info: [Key: Value]
+        @ViewBuilder let rowContent: (Key, Value) -> RowContent
+        
+        var body: some View {
+            VStack {
+                Text(name)
+                ForEach(
+                    info.sorted(by: { $0.key < $1.key }),
+                    id: \.0,
+                    content: rowContent
+                )
+            }
+            .padding()
+            .foregroundStyle(.white)
+            .background {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color.black.opacity(0.6))
+            }
+        }
+    }
+    
+    @ViewBuilder
+    var debugger: some View {
+        VStack {
+            DebugInfo(
+                name: "picker.frame.minY",
+                info: pickerFrameMinY
+            ) { key, value in
+                HStack {
+                    Text(key)
+                    Spacer()
+                    Text(String(format: "%.2f", value))
+                }
+            }
+            DebugInfo(
+                name: "scrollView.contentOffset.y",
+                info: scrollOffset
+            ) { key, value in
+                HStack {
+                    key
+                    Spacer()
+                    Text(String(format: "%.2f", value))
+                }
+            }
+        }
+        .padding()
+        .background {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.black.opacity(0.8))
+        }
+        .padding()
+    }
+    
+}
+
+private let figureItems = (0...60).map { _ in StaggerItem() }
+private let natureItems = (0...60).map { _ in StaggerItem(nature: true) }
+
+enum StickyTab: String, CaseIterable, Identifiable {
+    case figure, leaf
+    
+    var id: Self { self }
+}
+
+extension StickyTab: View {
+    var body: some View {
+        Image(systemName: rawValue)
     }
 }
 
-private let loremipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam mattis magna at urna porta, vitae dictum ex malesuada. Mauris magna velit, interdum at eros ac, bibendum blandit quam. Fusce gravida dolor eget porta maximus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nullam interdum tellus ac diam tristique, eget iaculis risus dictum. Maecenas at neque auctor, pellentesque est vel, aliquam diam. Duis tellus ex, cursus in pharetra non, elementum non nunc. Nullam eu dolor blandit, sodales tellus quis, egestas neque. Donec rutrum sed lorem ac vestibulum. Cras ultrices arcu ut vehicula rutrum. Aenean placerat purus a metus efficitur consequat."
+extension StickyTab: Comparable {
+    static func < (lhs: StickyTab, rhs: StickyTab) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
+}
+
+struct StickyHeaderDemo: View {
+    @State private var selectedTab: StickyTab = .figure
+    
+    var body: some View {
+        StickyTabScrollView(currentTab: selectedTab) {
+            HStack {
+                Image(systemName: "globe")
+                    .foregroundStyle(.tint)
+                
+                Text("Hello, world!")
+            }
+        } picker: {
+            Picker("Tab", selection: $selectedTab) {
+                ForEach(StickyTab.allCases) {
+                    $0
+                }
+            }
+            .pickerStyle(.segmented)
+            .padding()
+
+        } content: {
+            let columns: [GridItem] = [.init(.adaptive(minimum: 80), spacing: 16)]
+            let items: [StaggerItem] = switch selectedTab {
+            case .figure: figureItems
+            case .leaf: natureItems
+            }
+
+            LazyVGrid(columns: columns, spacing: 16) {
+                ForEach(items) { $0 }
+            }
+            .padding(.horizontal)
+        }
+    }
+}
 
 #Preview {
     StickyHeaderDemo()
